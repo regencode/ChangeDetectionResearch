@@ -1,0 +1,6 @@
+__pycache__
+*.pth
+*.pt
+outputs/
+experiments/*/logs/
+notebooks/.ipynb_checkpoints
