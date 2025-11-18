@@ -1,12 +1,14 @@
+from typing import Optional
 import torch
 from .metrics import calculate_metrics
+from .display import display_during_inference
 
 def y_to_binary(y):
     y_binary = torch.zeros_like(y)
     y_binary[y != 0] = 1
     return y_binary
 
-def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=False, **kwargs):
+def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=False, device="cuda", **kwargs):
         # concat X along channel
         X_batch = X_batch.float() / 255.0
 
@@ -29,12 +31,12 @@ def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=Fa
         return loss.item(), y_binary, outputs_binary
 
 
-def train_one_epoch(model, dataloader, optimizer, loss_fn, device="cpu"):
+def train_one_epoch(model, dataloader, optimizer, loss_fn, device="cuda"):
     model.train()  # Set the model to training mode
     running_loss = 0.0
     batch_losses = []
     for i, (X_batch, y_batch) in enumerate(dataloader):
-        loss, *_ = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=True)
+        loss, *_ = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=True, device=device)
         running_loss += loss
         print(f"\r[Train {i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
         batch_losses.append(loss)
@@ -47,7 +49,7 @@ def val_one_epoch(model, dataloader, optimizer, loss_fn, device):
     batch_losses = []
     with torch.no_grad():
         for i, (X_batch, y_batch) in enumerate(dataloader):
-            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False)
+            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False, device=device)
             running_loss += loss
 
             print(f"\r[Val {i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
@@ -70,7 +72,7 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device):
 
     with torch.no_grad():
         for i, (X_batch, y_batch) in enumerate(dataloader):
-            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False)
+            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False, device=device)
             running_loss += loss
             print(f"\r[Test{i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
             batch_losses.append(loss)

@@ -86,6 +86,7 @@ class LEVIR_CD_Dataset(BaseDataset):
         x1_paths = glob.glob(f"{x1_dir}/*.png")
         x2_paths = glob.glob(f"{x2_dir}/*.png")
         mask_paths = glob.glob(f"{mask_dir}/*.png")
+
         super().__init__(x1_paths, x2_paths, mask_paths, pair_transforms, return_y_image)
 
 
