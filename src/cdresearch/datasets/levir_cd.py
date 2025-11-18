@@ -12,6 +12,11 @@ class Patchify:
         self.ph = ph
         self.pw = pw
     def __call__(self, x):
+        '''
+        from image of shape (C, H, W),
+        return tensor of shape (N, C, new_H, new_W)
+        where N is the number of patches in the input image
+        '''
         C, H, W = x.shape
 
         ph = self.ph
@@ -74,9 +79,9 @@ def load_levir(drive_path, patchify=False, patch_size=(256, 256)):
 class LEVIR_CD_Dataset(BaseDataset):
     def __init__(self, root="./LEVIR_CD", split="train", pair_transforms=None, return_y_image=False):
 
-        x1_dir = f"{root}/A/{split}/"
-        x2_dir = f"{root}/B/{split}/"
-        mask_dir = f"{root}/label/{split}/"
+        x1_dir = f"{root}/{split}/A/"
+        x2_dir = f"{root}/{split}/B/"
+        mask_dir = f"{root}/{split}/label/"
 
         x1_paths = glob.glob(f"{x1_dir}/*.png")
         x2_paths = glob.glob(f"{x2_dir}/*.png")
