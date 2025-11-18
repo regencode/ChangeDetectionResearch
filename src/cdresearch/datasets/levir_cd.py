@@ -27,7 +27,7 @@ class Patchify:
 def load_levir(drive_path, patchify=False, patch_size=(256, 256)):
     DATA_SOURCE = drive_path
     DATA_DEST = "./LEVIR_CD"
-    DATA_PATCH_FOLDER = "./LEVIR_CD_patched"
+    DATA_PATCH_FOLDER = "./LEVIR_CD_patched/"
 
     if os.path.exists(DATA_DEST):
         print("Data patch folder already exists! Skipping loading and unzipping data...")
