@@ -5,13 +5,14 @@ from torchvision.transforms.functional import crop, resize
 import random
 import einops as ein
 import cv2 as cv
+import numpy as np
 
 class RandomFlip:
     def __init__(self, p=0.5):
         self.p = p
 
     def __call__(self, x1: torch.Tensor, x2: torch.Tensor, mask: torch.Tensor):
-        if torch.rand(1).item() < self.p:
+        if torch.rand(()) < self.p:
             rand_flip = torch.randint(0, 3, (1,)).item()
             if rand_flip == 0:
                 # horizontal flip
@@ -43,7 +44,7 @@ class RandomScale:
         min = self.min
         max = self.max
         C, H, W = x1.shape[-3:]
-        rand_scale = torch.rand(1).item() * (max-min) + min
+        rand_scale = torch.rand(()) * (max-min) + min
         new_H = int(H * rand_scale)
         new_W = int(W * rand_scale)
 
@@ -81,10 +82,8 @@ class RandomBlur:
         self.p = p
 
     def __call__(self, x1, x2, mask):
-        if random.random() < self.p:
+        if torch.rand(()) < self.p:
             x1 = self.blur(x1)
-
-        if random.random() < self.p:
             x2 = self.blur(x2)
         return x1, x2, mask
 
@@ -95,9 +94,9 @@ class RandomColorJitter:
         self.p = p
 
     def __call__(self, x1, x2, mask):
-        if random.random() < self.p:
+        if torch.rand(()) < self.p:
             x1 = self.jitter(x1)
-        if random.random() < self.p:
+        if torch.rand(()) < self.p:
             x2 = self.jitter(x2)
         return x1, x2, mask
 
@@ -114,18 +113,18 @@ class PairCompose:
             x1, x2, mask = t(x1, x2, mask)
         return x1, x2, mask
 
-def to_numpy(x):
+def to_numpy(x: torch.Tensor) -> np.ndarray:
     return x.cpu().numpy()
 
 def lanczos_resample_torch(x : torch.Tensor):
-    x = ein.rearrange(x, "c w h -> w h c")
-    x = to_numpy(x)
-    W, H, C = x.shape
+    x_new = to_numpy(x)
+    x_new = ein.rearrange(x_new, "c w h -> w h c")
+    W, H, C = x_new.shape
     new_W = int(W*1.2)
     new_H = int(H*1.2)
-    x = cv.resize(x, (new_W, new_H), interpolation=cv.INTER_LANCZOS4)
-    x = cv.resize(x, (W, H), interpolation=cv.INTER_LANCZOS4)
-    return ein.rearrange(torch.from_numpy(x), "w h c -> c w h")
+    x_new = cv.resize(x_new, (new_W, new_H), interpolation=cv.INTER_LANCZOS4)
+    x_new = cv.resize(x_new, (W, H), interpolation=cv.INTER_LANCZOS4)
+    return ein.rearrange(torch.from_numpy(x_new), "w h c -> c w h")
 
 class Interpolate:
     def __init__(self, size : tuple, mode="bilinear", upsample_mask=True):
