@@ -29,7 +29,7 @@ class ResBlock(nn.Module):
 
 class DownsampleResBlock(ResBlock):
     def __init__(self, in_channels, out_channels):
-        super.__init__(in_channels, out_channels)
+        super().__init__(in_channels, out_channels)
         self.downsample = nn.MaxPool2d(kernel_size=(2, 2))
 
     def forward(self, x):
@@ -53,6 +53,7 @@ class UpsampleResBlock(ResBlock):
 
 class EncoderBlock(nn.Module):
     def __init__(self, in_channels, out_channels, expand_channels=1):
+        super().__init__()
         self.res1 = ResBlock(in_channels, in_channels*expand_channels)
         self.res2 = ResBlock(in_channels*expand_channels, in_channels*expand_channels)
         self.res3 = DownsampleResBlock(in_channels*expand_channels, out_channels)
@@ -64,6 +65,7 @@ class EncoderBlock(nn.Module):
 
 class DecoderBlock(nn.Module):
     def __init__(self, in_channels, out_channels, expand_channels=1):
+        super().__init__()
         self.res1 = ResBlock(in_channels, in_channels*expand_channels)
         self.res2 = ResBlock(in_channels*expand_channels, in_channels*expand_channels)
         self.res3 = UpsampleResBlock(in_channels*expand_channels, out_channels)
@@ -117,6 +119,7 @@ class HRSCD_Decoder(nn.Module):
 
 class HRSCD_str4(nn.Module):
     def __init__(self, in_channels, out_channels, expand_enc_channels=1, expand_dec_channels=1):
+        super().__init__()
         self.encoder_cd = HRSCD_Encoder(in_channels*2, expand_enc_channels)
         self.decoder_cd = HRSCD_Decoder(2, expand_dec_channels)
 
