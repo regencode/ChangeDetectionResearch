@@ -248,7 +248,7 @@ class Downsample(nn.Module):
         else:
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
-            nn.Conv2d(dim, dim_out, 3, 2, 1, bias=False),
+            nn.Conv2d(dim, dim_out, 3, 2, 1, bias=False, padding_mode="reflect"),
         )
 
     def forward(self, x):
@@ -271,10 +271,10 @@ class PatchEmbed(nn.Module):
         super().__init__()
         self.proj = nn.Identity()
         self.conv_down = nn.Sequential(
-            nn.Conv2d(in_chans, in_dim, 3, 2, 1, bias=False), # kernel stride padding
+            nn.Conv2d(in_chans, in_dim, 3, 2, 1, bias=False, padding_mode="reflect"), # kernel stride padding
             nn.BatchNorm2d(in_dim, eps=1e-4),
             nn.ReLU(),
-            nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
+            nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False, padding_mode="reflect"),
             nn.BatchNorm2d(out_chans, eps=1e-4),
             nn.ReLU()
             )
@@ -293,10 +293,10 @@ class ConvBlock(nn.Module):
                  kernel_size=3):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
         self.norm1 = nn.BatchNorm2d(dim, eps=1e-5)
         self.act1 = nn.GELU(approximate= 'tanh')
-        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
         self.norm2 = nn.BatchNorm2d(dim, eps=1e-5)
         self.layer_scale = layer_scale
         if layer_scale is not None and type(layer_scale) in [int, float]:
