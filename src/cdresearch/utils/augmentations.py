@@ -138,8 +138,8 @@ class Interpolate:
             x2 = lanczos_resample_torch(x2)
         else:
             C, W, H = x1.shape
-            new_W = self.size[0]
-            new_H = self.size[1]
+            new_W = W*1.2
+            new_H = H*1.2
             x1 = F.interpolate(x1.unsqueeze(0), size=(new_W, new_H), mode=self.mode, align_corners=False if self.mode == "bilinear" else None)
             x1 = F.interpolate(x1, size=(W, H), mode=self.mode).squeeze(0)
 
