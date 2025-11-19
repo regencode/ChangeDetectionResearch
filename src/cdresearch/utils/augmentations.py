@@ -116,12 +116,11 @@ class PairCompose:
 def to_numpy(x: torch.Tensor) -> np.ndarray:
     return x.cpu().numpy()
 
-def lanczos_resample_torch(x : torch.Tensor):
+def lanczos_resample_torch(x : torch.Tensor, intermediate_size):
     x_new = to_numpy(x)
     x_new = ein.rearrange(x_new, "c w h -> w h c")
     W, H, C = x_new.shape
-    new_W = int(W*1.2)
-    new_H = int(H*1.2)
+    new_W, new_H = intermediate_size
     x_new = cv.resize(x_new, (new_W, new_H), interpolation=cv.INTER_LANCZOS4)
     x_new = cv.resize(x_new, (W, H), interpolation=cv.INTER_LANCZOS4)
     return ein.rearrange(torch.from_numpy(x_new), "w h c -> c w h")
@@ -134,8 +133,8 @@ class Interpolate:
 
     def __call__(self, x1, x2, mask):
         if self.mode.lower() == "lanczos":
-            x1 = lanczos_resample_torch(x1)
-            x2 = lanczos_resample_torch(x2)
+            x1 = lanczos_resample_torch(x1, self.size)
+            x2 = lanczos_resample_torch(x2, self.size)
         else:
             C, W, H = x1.shape
             new_W = W*1.2
@@ -147,5 +146,33 @@ class Interpolate:
             x2 = F.interpolate(x2, size=(W, H), mode=self.mode).squeeze(0)
         if self.upsample_mask:
             mask = F.interpolate(mask, size=self.size, mode="nearest")
+        return x1, x2, mask
+
+class Resample:
+    def __init__(self, intermediate_size : tuple, mode="bilinear"):
+        self.mode = mode
+        self.size = intermediate_size
+
+    def __call__(self, x1, x2, mask):
+        C, W, H = x1.shape
+        new_W, new_H = self.size
+        if self.mode.lower() == "lanczos":
+            x1 = lanczos_resample_torch(x1, self.size)
+            x2 = lanczos_resample_torch(x2, self.size)
+        else:
+            x1 = F.interpolate(x1.unsqueeze(0), size=(new_H, new_W),
+                               mode=self.mode,
+                               align_corners=False if self.mode in ["bilinear", "bicubic"] else None)
+            x1 = F.interpolate(x1, size=(H, W),
+                           mode=self.mode,
+                           align_corners=False if self.mode in ["bilinear", "bicubic"] else None).squeeze(0)
+
+            x2 = F.interpolate(x2.unsqueeze(0), size=(new_H, new_W),
+                           mode=self.mode,
+                           align_corners=False if self.mode in ["bilinear", "bicubic"] else None)
+            x2 = F.interpolate(x2, size=(H, W),
+                           mode=self.mode,
+                           align_corners=False if self.mode in ["bilinear", "bicubic"] else None).squeeze(0)
+
         return x1, x2, mask
 
