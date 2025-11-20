@@ -398,7 +398,7 @@ class MambaVisionCD_V2(nn.Module):
                      drop_rate=drop_rate,
                      attn_drop_rate=attn_drop_rate,
                      layer_scale=layer_scale,
-                     layer_scale_conv=layer_scale_conv
+                     layer_scale_conv=layer_scale_conv,
                      patchembed_downsample=False
             )
         self.dec = MambaVisionCDDecoder(num_classes,
