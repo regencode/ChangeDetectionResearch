@@ -206,8 +206,8 @@ class Sobel(nn.Module):
     def forward(self, x):
         g = self.sobel_kernel(x)
 
-        gx = g[0]
-        gy = g[1]
+        gx = g[:, 0]
+        gy = g[:, 1]
         return torch.abs(gx) + torch.abs(gy)
 
 
