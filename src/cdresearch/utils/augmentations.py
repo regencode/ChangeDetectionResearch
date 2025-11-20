@@ -1,8 +1,8 @@
 import torch
+from torch import nn
 import torch.nn.functional as F
 import torchvision.transforms as T
 from torchvision.transforms.functional import crop, resize
-import random
 import einops as ein
 import cv2 as cv
 import numpy as np
@@ -175,4 +175,39 @@ class Resample:
                            align_corners=False if self.mode in ["bilinear", "bicubic"] else None).squeeze(0)
 
         return x1, x2, mask
+
+class Sobel(nn.Module):
+    def __init__(self, in_channels):
+        super().__init__()
+        self.sobel_kernel = nn.Conv2d(in_channels, 2, kernel_size=3, padding="same")
+
+        sobel_x = torch.tensor([
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1]
+        ], dtype=torch.float32)
+
+        sobel_y = torch.tensor([
+            [-1, -2, -1],
+            [ 0,  0,  0],
+            [ 1,  2,  1]
+        ], dtype=torch.float32)
+
+        with torch.no_grad():
+            for c in range(in_channels):
+                self.sobel_kernel.weight[0, c] = sobel_x
+                self.sobel_kernel.weight[1, c] = sobel_y 
+            self.sobel_kernel.bias.zero_()
+
+            # Freeze parameters
+            self.sobel_kernel.weight.requires_grad_(False)
+            self.sobel_kernel.bias.requires_grad_(False)
+
+    def forward(self, x):
+        g = self.sobel_kernel(x)
+        gx = g[:, 0]
+        gy = g[:, 1]
+        return torch.abs(gx) + torch.abs(gy)
+
+
 
