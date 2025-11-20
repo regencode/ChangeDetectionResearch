@@ -360,5 +360,57 @@ class MambaVisionCD(nn.Module):
         return self.dec(x1s, x2s)
 
 
+
+class MambaVisionCD_V2(nn.Module):
+    def __init__(self,
+                 in_chans,
+                 encoder_model=None,
+                 dims=[64, 128, 256, 512],
+                 reduced_dims=None,
+                 depths=[2, 2, 4, 2],
+                 window_size=[4, 4, 6, 8],
+                 mlp_ratio=4,
+                 num_heads=[2, 4, 8, 16],
+                 drop_path_rate=0.2,
+                 num_classes=2,
+                 qkv_bias=True,
+                 qk_scale=None,
+                 drop_rate=0.,
+                 attn_drop_rate=0.,
+                 layer_scale=None,
+                 layer_scale_conv=None,
+                 **kwargs):
+        super().__init__()
+        if encoder_model is not None:
+            self.enc = create_model(encoder_model, in_chans=in_chans, pretrained=True, **kwargs)
+        else:
+            self.enc = MambaVision(
+                     in_chans,
+                     dims,
+                     depths,
+                     window_size,
+                     mlp_ratio,
+                     num_heads,
+                     drop_path_rate=drop_path_rate,
+                     num_classes=num_classes,
+                     qkv_bias=qkv_bias,
+                     qk_scale=qk_scale,
+                     drop_rate=drop_rate,
+                     attn_drop_rate=attn_drop_rate,
+                     layer_scale=layer_scale,
+                     layer_scale_conv=layer_scale_conv
+                     patchembed_downsample=False
+            )
+        self.dec = MambaVisionCDDecoder(num_classes,
+                                        dims=self.enc.dims,
+                                        reduced_dims=None,
+                                        upsample=False)
+
+    def forward(self, x1, x2):
+        x1s = self.enc(x1)
+        x2s = self.enc(x2)
+        return self.dec(x1s, x2s)
+
+
 if __name__ == "__main__":
     print(list_models())

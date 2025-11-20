@@ -261,7 +261,7 @@ class PatchEmbed(nn.Module):
     Patch embedding block"
     """
 
-    def __init__(self, in_chans=3, out_chans=32, in_dim=64):
+    def __init__(self, in_chans=3, out_chans=32, in_dim=64, downsample=True):
         """
         Args:
             in_chans: number of input channels.
@@ -270,14 +270,24 @@ class PatchEmbed(nn.Module):
         # in_dim = 1
         super().__init__()
         self.proj = nn.Identity()
-        self.conv_down = nn.Sequential(
-            nn.Conv2d(in_chans, in_dim, 3, 2, 1, bias=False, padding_mode="reflect"), # kernel stride padding
-            nn.BatchNorm2d(in_dim, eps=1e-4),
-            nn.ReLU(),
-            nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False, padding_mode="reflect"),
-            nn.BatchNorm2d(out_chans, eps=1e-4),
-            nn.ReLU()
-            )
+        if downsample:
+            self.conv_down = nn.Sequential(
+                nn.Conv2d(in_chans, in_dim, 3, 2, 1, bias=False, padding_mode="reflect"), # kernel stride padding
+                nn.BatchNorm2d(in_dim, eps=1e-4),
+                nn.ReLU(),
+                nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False, padding_mode="reflect"),
+                nn.BatchNorm2d(out_chans, eps=1e-4),
+                nn.ReLU()
+                )
+        else:
+            self.conv_down = nn.Sequential(
+                nn.Conv2d(in_chans, in_dim, 3, 1, 1, bias=False, padding_mode="reflect"),
+                nn.BatchNorm2d(in_dim, eps=1e-4),
+                nn.ReLU(),
+                nn.Conv2d(in_dim, out_chans, 3, 1, 1, bias=False, padding_mode="reflect"),
+                nn.BatchNorm2d(out_chans, eps=1e-4),
+                nn.ReLU()
+                )
 
     def forward(self, x):
         x = self.proj(x)
@@ -649,6 +659,8 @@ class MambaVision(nn.Module):
                  attn_drop_rate=0.,
                  layer_scale=None,
                  layer_scale_conv=None,
+                 patch_embed_dim=256,
+                 patchembed_downsample=True,
                  **kwargs):
         self.dims = dims
         self.depths = depths
@@ -671,7 +683,7 @@ class MambaVision(nn.Module):
         """
         super().__init__()
         assert len(dims) == len(depths), f"dims[] len does not match depths[] len"
-        self.patch_embed = PatchEmbed(in_chans=in_chans, out_chans=dims[0], in_dim=256)
+        self.patch_embed = PatchEmbed(in_chans=in_chans, out_chans=dims[0], in_dim=patch_embed_dim, downsample=patchembed_downsample)
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
         self.levels = nn.ModuleList()
         self.downsamples = nn.ModuleList()
