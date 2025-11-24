@@ -17,7 +17,7 @@ def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=Fa
         # Load data and move to device
 
         X_batch = X_batch.to(device)
-        y_binary = y_batch.to(device) # (N, P, W, H)
+        y_binary = y_batch.to(device)
 
         # Forward pass
         outputs_binary = model(X_batch[0], X_batch[1])

@@ -143,13 +143,17 @@ class LocalExtractor(nn.Module):
         super().__init__()
         self.d_inner = int(in_channels*expand)
         self.mamba_mixer_path = MambaVisionMixer(in_channels, expand=expand, use_linear=False)
+
+        self.gating_function = nn.Sequential(
+            nn.Linear(self.d_inner, self.d_inner),
+            nn.Sigmoid()
+        )
         self.local_ext_path = nn.Sequential(
             ToImageForm(),
-            nn.Conv2d(in_channels, self.d_inner, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, self.d_inner, kernel_size=3, padding="same"),
             nn.SiLU(),
-            nn.Conv2d(self.d_inner, self.d_inner, kernel_size=3, padding=1),
+            nn.Conv2d(self.d_inner, self.d_inner, kernel_size=3, padding="same"), 
             ToSequenceForm(),
-            nn.SiLU()
         ) 
         self.out_proj = nn.Linear(self.d_inner, out_channels)
         self.to_img = ToImageForm()
@@ -157,9 +161,12 @@ class LocalExtractor(nn.Module):
     def forward(self, f1, f2):
         x11 = self.mamba_mixer_path(f1)
         x12 = self.local_ext_path(f2)
+        x12 = x12 * self.gating_function(x12)
 
         x21 = self.mamba_mixer_path(f2)
         x22 = self.local_ext_path(f1)
+        x22 = x22 * self.gating_function(x22)
+
         return self.to_img(self.out_proj(x11 * x12)), self.to_img(self.out_proj(x21 * x22))
         
 
@@ -207,8 +214,8 @@ class LocalGlobalFusion(nn.Module):
         G1 = self.compute_gate_score(glb1, lcl1)
         G2 = self.compute_gate_score(glb2, lcl2)
 
-        x1 = G1[:, 0:1].view(B, 1, 1, 1)*lcl1 + G1[:, 1:2].view(B, 1, 1, 1)*glb1
-        x2 = G2[:, 0:1].view(B, 1, 1, 1)*lcl2 + G2[:, 1:2].view(B, 1, 1, 1)*glb2
+        x1 = G1[:, 0:1].view(B, 1, 1, 1)*glb1 + G1[:, 1:2].view(B, 1, 1, 1)*lcl1
+        x2 = G2[:, 0:1].view(B, 1, 1, 1)*glb2 + G2[:, 1:2].view(B, 1, 1, 1)*lcl2
 
         return torch.abs(x1 - x2)
 
@@ -254,14 +261,19 @@ class ConvUpsampleAndClassify(nn.Module):
 
     def forward(self, x):
         N, C, W, H = x.shape
+
         if self.upsample:
             x = self.conv1(x)
             assert x.shape == (N, C, W*2, H*2), x.shape
+
         x1 = self.dense(x)
+
         if self.upsample:
             x1 = self.conv2(x + x1)
             assert x1.shape == (N, C, W*4, H*4), x.shape
-        class_logits = self.conv_classify(x1)
+            class_logits = self.conv_classify(x1)
+        else:
+            class_logits = self.conv_classify(x1 + x)
         return class_logits
 
 class MambaVisionCDDecoder(nn.Module):
