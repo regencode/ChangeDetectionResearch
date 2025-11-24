@@ -43,23 +43,7 @@ def train_one_epoch(model, dataloader, optimizer, loss_fn, device="cuda"):
 
     return running_loss / len(dataloader), batch_losses
 
-def val_one_epoch(model, dataloader, optimizer, loss_fn, device, display_inference=False):
-    model.eval()  # Set the model to training mode
-    running_loss = 0.0
-    batch_losses = []
-    with torch.no_grad():
-        for i, (X_batch, y_batch) in enumerate(dataloader):
-            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False, device=device)
-            running_loss += loss
-
-            print(f"\r[Val {i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
-            batch_losses.append(loss)
-
-            if i % 100 == 0 and display_inference:
-                display_during_inference(X_batch, y_binary, output_binary)
-    return running_loss / len(dataloader), batch_losses
-
-def test_one_epoch(model, dataloader, optimizer, loss_fn, device):
+def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_inference=False):
     model.eval()  # Set the model to training mode
     running_loss = 0.0
     batch_losses = []
@@ -83,7 +67,7 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device):
                     stacks[j] = batch.detach().cpu()
                 else:
                     stacks[j] = torch.cat((stack, batch.detach().cpu()), dim=0)
-            if i % 10 == 0:
+            if i % 10 == 0 and display_inference:
                 display_during_inference(X_batch, y_binary, output_binary)
 
     X_batch_stack, y_binary_stack, output_binary_stack = stacks
@@ -94,8 +78,10 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device):
         "precision": precision,
         "recall": recall,
         "F1": F1,
-        "IoU": IoU
+        "IoU": IoU,
+        "loss": running_loss
     }
+    print(" ")
     print(metrics)
     return running_loss / len(dataloader), batch_losses, metrics
 
