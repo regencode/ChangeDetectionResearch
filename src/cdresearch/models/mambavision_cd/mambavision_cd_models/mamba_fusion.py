@@ -60,7 +60,7 @@ class GlobalExtractor(nn.Module):
         self.d_state = d_state
         self.d_inner = int(in_channels*expand)
         self.dt_rank = math.ceil(in_channels/ 16) if dt_rank == "auto" else dt_rank
-        self.mamba_mixer_path = MambaVisionMixer(in_channels, expand=expand, use_linear=False, d_conv=d_conv)
+        self.mamba_mixer_path = MambaVisionMixer(in_channels, expand=expand*2, use_linear=False, d_conv=d_conv)
         self.global_proj = nn.Linear(in_channels, self.d_inner)
         self.global_conv = nn.Sequential(
             nn.Conv1d(self.d_inner, self.d_inner, kernel_size=d_conv, groups=self.d_inner, padding="same"),
@@ -74,6 +74,10 @@ class GlobalExtractor(nn.Module):
         self.out_proj = nn.Linear(self.d_inner, out_channels)
         self.to_sequence = ToSequenceForm()
         self.to_img = ToImageForm()
+        self.gating_function = nn.Sequential(
+            nn.Linear(self.d_inner, self.d_inner),
+            nn.Sigmoid()
+        )
 
         A = repeat(
             torch.arange(1, d_state + 1, dtype=torch.float32, device=device),
@@ -130,9 +134,11 @@ class GlobalExtractor(nn.Module):
 
         x11 = self.mamba_mixer_path(f1)
         x12 = self.global_path(f2)
+        x12 = x12 * self.gating_function(x12)
 
         x21 = self.mamba_mixer_path(f2)
         x22 = self.global_path(f1)
+        x22 = x22 * self.gating_function(x22)
 
         return self.to_img(self.out_proj(x11 * x12)), self.to_img(self.out_proj(x21 * x22))
             

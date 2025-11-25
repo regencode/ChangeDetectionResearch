@@ -79,7 +79,7 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_infere
         "recall": recall,
         "F1": F1,
         "IoU": IoU,
-        "loss": running_loss
+        "loss": running_loss/len(dataloader)
     }
     print(" ")
     print(metrics)

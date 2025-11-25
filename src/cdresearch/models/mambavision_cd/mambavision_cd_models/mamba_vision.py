@@ -440,10 +440,13 @@ class MambaVisionMixer(nn.Module):
                               delta_softplus=True, 
                               return_last_state=None)
         
-        y = torch.cat([y, z], dim=1)
-        y = rearrange(y, "b d l -> b l d")
-        out = self.out_proj(y) if self.use_linear else y
-        return out
+        if self.use_linear:
+            y = torch.cat([y, z], dim=1)
+            y = rearrange(y, "b d l -> b l d")
+            out = self.out_proj(y) 
+            return out
+        else:
+            return rearrange(y * z, "b d l -> b l d")
     
 
 class Attention(nn.Module):
