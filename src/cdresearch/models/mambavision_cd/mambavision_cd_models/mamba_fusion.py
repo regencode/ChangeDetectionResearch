@@ -263,7 +263,7 @@ class ConvUpsampleAndClassify(nn.Module):
                 nn.Conv2d(embed_dims, in_channels, kernel_size=3, padding=1)
         )
         self.conv2 = nn.ConvTranspose2d(in_channels=in_channels, out_channels=in_channels, kernel_size=4, stride=2, padding=1)
-        self.conv_classify = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding=1)
+        self.conv_classify = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding="same")
 
     def forward(self, x):
         N, C, W, H = x.shape
