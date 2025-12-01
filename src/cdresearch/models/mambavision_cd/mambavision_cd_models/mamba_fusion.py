@@ -8,6 +8,10 @@ from mamba_ssm.ops.selective_scan_interface import selective_scan_fn
 import math
 from .registry import create_model, register_pip_model, list_models
 
+from .CDMamba import CDMambaDecoder
+from .ChangeMambaModels import ChangeDecoder as ChangeMambaDecoder
+from .ChangeFormerModels import DecoderTransformer_v3
+
 class ToSequenceForm(nn.Module):
     def __init__(self):
         super().__init__()
@@ -382,6 +386,7 @@ class MambaVisionCD(nn.Module):
 class MambaVisionCD_V2(nn.Module):
     def __init__(self,
                  in_chans,
+                 decoder_model="cdmamba",
                  encoder_model=None,
                  dims=[64, 128, 256, 512],
                  reduced_dims=None,
@@ -419,10 +424,63 @@ class MambaVisionCD_V2(nn.Module):
                      layer_scale_conv=layer_scale_conv,
                      patchembed_downsample=False
             )
-        self.dec = MambaVisionCDDecoder(num_classes,
-                                        dims=self.enc.dims,
-                                        reduced_dims=None,
-                                        upsample=False)
+        self.dec = nn.Identity()
+        if decoder_model.lower() == "changeformer":
+            self.dec= DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
+                    in_channels = self.embed_dims, embedding_dim= self.embedding_dim, output_nc=num_classes, 
+                    decoder_softmax=False, feature_strides=[2, 4, 8, 16])
+            pass
+        elif decoder_model.lower() == "changemamba":
+            from .ChangeMambaModels.models.vmamba import LayerNorm2d
+            _NORMLAYERS = dict(
+                ln=nn.LayerNorm,
+                ln2d=LayerNorm2d,
+                bn=nn.BatchNorm2d,
+            )
+            _ACTLAYERS = dict(
+                silu=nn.SiLU, 
+                gelu=nn.GELU, 
+                relu=nn.ReLU, 
+                sigmoid=nn.Sigmoid,
+            )
+            changemamba_kwargs = {
+                "ssm_d_state": 16,
+                "ssm_ratio": 2.0,
+                "ssm_dt_rank":  "auto",
+                "ssm_conv":  3,
+                "ssm_conv_bias": True,
+                "ssm_drop_rate":  0,
+                "ssm_init": "v0",
+                "forward_type": "v2",
+                "mlp_ratio": 4.0,
+                "mlp_drop_rate":  0.0,
+                "gmlp": False,
+                "use_checkpoint":  False,
+                "post_norm":  False,
+            }
+
+            self.decoder = ChangeMambaDecoder(
+                encoder_dims=dims,
+                channel_first=True,
+                norm_layer=nn.LayerNorm,
+                ssm_act_layer=nn.SiLU,
+                mlp_act_layer=nn.GELU,
+                **changemamba_kwargs
+            )
+        elif decoder_model.lower() == "cdmamba":
+            self.decoder = CDMambaDecoder(out_channels=num_classes, 
+                                        spatial_dims=3,
+                                        init_filters=dims[0], 
+                                        norm=("GROUP", {"num_groups": 8}),
+                                        mode="AGLGF", local_query_model="orignal_dinner",
+                                        stage=4,
+                                        mamba_act="silu",
+                                        up_mode="SRCM", up_conv_mode='deepwise', blocks_up=(1, 1, 1),
+                                        resdiual=False, diff_abs="later"
+                                        )
+        else:
+            print("decoder_model not implemented")
+            return NotImplementedError
 
     def forward(self, x1, x2):
         x1s = self.enc(x1)

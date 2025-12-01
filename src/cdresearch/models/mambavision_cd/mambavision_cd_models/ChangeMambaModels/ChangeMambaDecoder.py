@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from MambaCD.classification.models.vmamba import VSSM, LayerNorm2d, VSSBlock, Permute
+from .models.vmamba import VSSM, LayerNorm2d, VSSBlock, Permute
 
 
 class ChangeDecoder(nn.Module):
@@ -154,13 +154,14 @@ class ChangeDecoder(nn.Module):
         return F.interpolate(x, size=(H, W), mode='bilinear') + y
 
     def forward(self, pre_features, post_features):
+        # x1, x2, x3, x4
 
         pre_feat_1, pre_feat_2, pre_feat_3, pre_feat_4 = pre_features
 
         post_feat_1, post_feat_2, post_feat_3, post_feat_4 = post_features
 
         '''
-            Stage I
+            Stage I (deepest)
         '''
         p41 = self.st_block_41(torch.cat([pre_feat_4, post_feat_4], dim=1))
         B, C, H, W = pre_feat_4.size()
