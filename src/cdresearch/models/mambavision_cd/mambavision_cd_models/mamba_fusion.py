@@ -403,6 +403,7 @@ class MambaVisionCD_V2(nn.Module):
                  attn_drop_rate=0.,
                  layer_scale=None,
                  layer_scale_conv=None,
+                 patchembed_downsample=True,
                  **kwargs):
         super().__init__()
         if encoder_model is not None:
@@ -423,7 +424,7 @@ class MambaVisionCD_V2(nn.Module):
                      attn_drop_rate=attn_drop_rate,
                      layer_scale=layer_scale,
                      layer_scale_conv=layer_scale_conv,
-                     patchembed_downsample=False
+                     patchembed_downsample=patchembed_downsample
             )
         self.dec = nn.Identity()
         if decoder_model.lower() == "changeformer":
