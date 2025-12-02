@@ -427,6 +427,7 @@ class MambaVisionCD_V2(nn.Module):
                      patchembed_downsample=patchembed_downsample
             )
         self.dec = nn.Identity()
+        self.decoder_model = decoder_model
         if decoder_model.lower() == "changeformer":
             self.dec= DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
                     in_channels=dims, embedding_dim=embed_dims, output_nc=num_classes, 
@@ -487,7 +488,12 @@ class MambaVisionCD_V2(nn.Module):
     def forward(self, x1, x2):
         x1s = self.enc(x1)
         x2s = self.enc(x2)
-        return self.dec(x1s, x2s)
+        if self.decoder_model == "changeformer":
+            return self.dec(x1s, x2s)[-1]
+        elif self.decoder_model == "changemamba":
+            return self.dec(x1s, x2s)
+        if self.decoder_model == "mambacd":
+            return self.dec(x1s, x2s)
 
 if __name__ == "__main__":
     print(list_models())
