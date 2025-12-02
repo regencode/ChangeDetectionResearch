@@ -493,6 +493,8 @@ class MambaVisionCD_V2(nn.Module):
         if self.decoder_model == "changeformer":
             return self.decoder(x1s, x2s)[-1]
         elif self.decoder_model == "changemamba":
+            x1s = [rearrange(x1, "n c h w -> n (h w) c") for x1 in x1s]
+            x2s = [rearrange(x2, "n c h w -> n (h w) c") for x2 in x2s]
             return self.decoder(x1s, x2s)
         if self.decoder_model == "mambacd":
             return self.decoder(x1s, x2s)
