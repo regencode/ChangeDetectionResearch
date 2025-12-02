@@ -389,6 +389,7 @@ class MambaVisionCD_V2(nn.Module):
                  decoder_model="changeformer",
                  encoder_model=None,
                  dims=[64, 128, 256, 512],
+                 embed_dims=256,
                  reduced_dims=None,
                  depths=[2, 2, 4, 2],
                  window_size=[4, 4, 6, 8],
@@ -427,7 +428,7 @@ class MambaVisionCD_V2(nn.Module):
         self.dec = nn.Identity()
         if decoder_model.lower() == "changeformer":
             self.dec= DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
-                    in_channels = self.embed_dims, embedding_dim= self.embedding_dim, output_nc=num_classes, 
+                    in_channels=dims, embedding_dim=embed_dims, output_nc=num_classes, 
                     decoder_softmax=False, feature_strides=[2, 4, 8, 16])
             pass
         elif decoder_model.lower() == "changemamba":
