@@ -465,7 +465,7 @@ class MambaVisionCD_V2(nn.Module):
 
             self.decoder = ChangeMambaDecoder(
                 encoder_dims=self.enc.dims,
-                channel_first=True,
+                channel_first=False,
                 norm_layer=nn.LayerNorm,
                 ssm_act_layer=nn.SiLU,
                 mlp_act_layer=nn.GELU,
