@@ -386,7 +386,7 @@ class MambaVisionCD(nn.Module):
 class MambaVisionCD_V2(nn.Module):
     def __init__(self,
                  in_chans,
-                 decoder_model="cdmamba",
+                 decoder_model="changeformer",
                  encoder_model=None,
                  dims=[64, 128, 256, 512],
                  reduced_dims=None,
@@ -486,7 +486,6 @@ class MambaVisionCD_V2(nn.Module):
         x1s = self.enc(x1)
         x2s = self.enc(x2)
         return self.dec(x1s, x2s)
-
 
 if __name__ == "__main__":
     print(list_models())
