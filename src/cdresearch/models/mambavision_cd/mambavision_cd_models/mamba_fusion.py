@@ -430,7 +430,7 @@ class MambaVisionCD_V2(nn.Module):
         self.decoder_model = decoder_model
         if decoder_model.lower() == "changeformer":
             print(f"using dims={self.enc.dims}")
-            self.dec= DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
+            self.decoder = DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
                     in_channels=self.enc.dims, embedding_dim=embed_dims, output_nc=num_classes, 
                     decoder_softmax=False, feature_strides=[2, 4, 8, 16])
 
@@ -457,7 +457,7 @@ class MambaVisionCD_V2(nn.Module):
                 "ssm_init": "v0",
                 "forward_type": "v2",
                 "mlp_ratio": 4.0,
-                "mlp_drop_rate":  0.0,
+                "mlp_drop_rate":  0.1,
                 "gmlp": False,
                 "use_checkpoint":  False,
                 "post_norm":  False,
@@ -471,6 +471,7 @@ class MambaVisionCD_V2(nn.Module):
                 mlp_act_layer=nn.GELU,
                 **changemamba_kwargs
             )
+
         elif decoder_model.lower() == "cdmamba":
             self.decoder = CDMambaDecoder(out_channels=num_classes, 
                                         spatial_dims=3,
@@ -490,11 +491,11 @@ class MambaVisionCD_V2(nn.Module):
         x1s = self.enc(x1)
         x2s = self.enc(x2)
         if self.decoder_model == "changeformer":
-            return self.dec(x1s, x2s)[-1]
+            return self.decoder(x1s, x2s)[-1]
         elif self.decoder_model == "changemamba":
-            return self.dec(x1s, x2s)
+            return self.decoder(x1s, x2s)
         if self.decoder_model == "mambacd":
-            return self.dec(x1s, x2s)
+            return self.decoder(x1s, x2s)
 
 if __name__ == "__main__":
     print(list_models())
