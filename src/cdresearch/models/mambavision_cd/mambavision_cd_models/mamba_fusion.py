@@ -429,10 +429,11 @@ class MambaVisionCD_V2(nn.Module):
         self.dec = nn.Identity()
         self.decoder_model = decoder_model
         if decoder_model.lower() == "changeformer":
+            print(f"using dims={[self.enc.dims*(2**i) for i in range(0, 4)]}")
             self.dec= DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
-                    in_channels=[self.enc.dims*(2**i) for i in range(1, 5)], embedding_dim=embed_dims, output_nc=num_classes, 
+                    in_channels=[self.enc.dims*(2**i) for i in range(0, 4)], embedding_dim=embed_dims, output_nc=num_classes, 
                     decoder_softmax=False, feature_strides=[2, 4, 8, 16])
-            pass
+
         elif decoder_model.lower() == "changemamba":
             from .ChangeMambaModels.models.vmamba import LayerNorm2d
             _NORMLAYERS = dict(
