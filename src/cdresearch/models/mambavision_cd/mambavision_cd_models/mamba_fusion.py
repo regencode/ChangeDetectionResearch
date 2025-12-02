@@ -464,7 +464,7 @@ class MambaVisionCD_V2(nn.Module):
             }
 
             self.decoder = ChangeMambaDecoder(
-                encoder_dims=dims,
+                encoder_dims=self.enc.dims,
                 channel_first=True,
                 norm_layer=nn.LayerNorm,
                 ssm_act_layer=nn.SiLU,
@@ -475,7 +475,7 @@ class MambaVisionCD_V2(nn.Module):
         elif decoder_model.lower() == "cdmamba":
             self.decoder = CDMambaDecoder(out_channels=num_classes, 
                                         spatial_dims=3,
-                                        init_filters=dims[0], 
+                                        init_filters=self.enc.dims[0],
                                         norm=("GROUP", {"num_groups": 8}),
                                         mode="AGLGF", local_query_model="orignal_dinner",
                                         stage=4,
