@@ -491,6 +491,7 @@ class MambaVisionCD_V2(nn.Module):
     def forward(self, x1, x2):
         B, C, H, W = x1.shape
         x1s = self.enc(x1)
+
         x2s = self.enc(x2)
         if self.decoder_model == "changeformer":
             return self.decoder(x1s, x2s)[-1]
