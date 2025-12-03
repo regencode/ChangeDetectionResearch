@@ -471,6 +471,7 @@ class MambaVisionCD_V2(nn.Module):
                 mlp_act_layer=nn.GELU,
                 **changemamba_kwargs
             )
+            self.main_clf = nn.Conv2d(in_channels=128, out_channels=2, kernel_size=1)
 
         elif decoder_model.lower() == "cdmamba":
             self.decoder = CDMambaDecoder(out_channels=num_classes, 
@@ -488,14 +489,17 @@ class MambaVisionCD_V2(nn.Module):
             return NotImplementedError
 
     def forward(self, x1, x2):
+        B, C, H, W = x1.shape
         x1s = self.enc(x1)
         x2s = self.enc(x2)
         if self.decoder_model == "changeformer":
             return self.decoder(x1s, x2s)[-1]
         elif self.decoder_model == "changemamba":
-            return self.decoder(x1s, x2s)
+            output = self.main_clf(self.decoder(x1s, x2s))
+            return F.interpolate(output, size=(H, W), mode='bilinear')
         if self.decoder_model == "mambacd":
-            return self.decoder(x1s, x2s)
+            output = self.decoder(x1s, x2s)
+            return F.interpolate(output, size=(H, W), mode='bilinear')
 
 if __name__ == "__main__":
     print(list_models())
