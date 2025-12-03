@@ -3,7 +3,7 @@ import math
 from torch import nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-from timm.layers.drop import DropPath
+from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import time
 
 
