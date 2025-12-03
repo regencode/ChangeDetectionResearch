@@ -473,7 +473,7 @@ class MambaVisionCD_V2(nn.Module):
             )
             self.main_clf = nn.Conv2d(in_channels=128, out_channels=2, kernel_size=1)
 
-        elif decoder_model.lower() == "cdmamba":
+        elif decoder_model.lower() == "mambacd":
             self.decoder = CDMambaDecoder(out_channels=num_classes, 
                                         spatial_dims=3,
                                         init_filters=self.enc.dims[0],
