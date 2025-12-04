@@ -7,30 +7,29 @@ import einops as ein
 import cv2 as cv
 import numpy as np
 
-class RandomFlip:
+class RandomHorizontalFlip:
     def __init__(self, p=0.5):
         self.p = p
 
     def __call__(self, x1: torch.Tensor, x2: torch.Tensor, mask: torch.Tensor):
         if torch.rand(()) < self.p:
-            rand_flip = torch.randint(0, 3, (1,)).item()
-            if rand_flip == 0:
-                # horizontal flip
-                x1 = torch.flip(x1, dims=[-2])
-                x2 = torch.flip(x2, dims=[-2])
-                mask = torch.flip(mask, dims=[-2])
+            # horizontal flip
+            x1 = torch.flip(x1, dims=[-2])
+            x2 = torch.flip(x2, dims=[-2])
+            mask = torch.flip(mask, dims=[-2])
 
-            elif rand_flip == 1:
-                # vertical flip
-                x1 = torch.flip(x1, dims=[-1])
-                x2 = torch.flip(x2, dims=[-1])
-                mask = torch.flip(mask, dims=[-1])
+        return x1, x2, mask
 
-            else:
-                # horizontal + vertical flip
-                x1 = torch.flip(x1, dims=[-2, -1])
-                x2 = torch.flip(x2, dims=[-2, -1])
-                mask = torch.flip(mask, dims=[-2, -1])
+class RandomVerticalFlip:
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def __call__(self, x1: torch.Tensor, x2: torch.Tensor, mask: torch.Tensor):
+        if torch.rand(()) < self.p:
+            # vertical flip
+            x1 = torch.flip(x1, dims=[-1])
+            x2 = torch.flip(x2, dims=[-1])
+            mask = torch.flip(mask, dims=[-1])
 
         return x1, x2, mask
 
