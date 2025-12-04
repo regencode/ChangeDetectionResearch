@@ -12,7 +12,7 @@ from einops import rearrange, repeat
 
 from causal_conv1d import causal_conv1d_fn, causal_conv1d_update
 
-from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, mamba_inner_fn, mamba_inner_fn_no_out_proj
+from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, mamba_inner_fn
 
 from mamba_ssm.ops.triton.selective_state_update import selective_state_update
 
@@ -216,7 +216,7 @@ class ConvMamba(nn.Module):
         if self.use_fast_path and inference_params is None:  # Doesn't support outputting the states
             if self.bimamba_type == "v2":
                 A_b = -torch.exp(self.A_b_log.float())
-                out = mamba_inner_fn_no_out_proj(
+                out = mamba_inner_fn(
                     xz,
                     self.conv1d.weight,
                     self.conv1d.bias,
@@ -229,7 +229,7 @@ class ConvMamba(nn.Module):
                     delta_bias=self.dt_proj.bias.float(),
                     delta_softplus=True,
                 )
-                out_b = mamba_inner_fn_no_out_proj(
+                out_b = mamba_inner_fn(
                     xz.flip([-1]),
                     self.conv1d_b.weight,
                     self.conv1d_b.bias,
@@ -591,7 +591,7 @@ class L_GF_Mamba(nn.Module):
         if self.use_fast_path and inference_params is None:  # Doesn't support outputting the states
             if self.bimamba_type == "v2":
                 A_b = -torch.exp(self.A_b_log.float())
-                out = mamba_inner_fn_no_out_proj(
+                out = mamba_inner_fn(
                     xz,
                     self.conv1d.weight,
                     self.conv1d.bias,
@@ -604,7 +604,7 @@ class L_GF_Mamba(nn.Module):
                     delta_bias=self.dt_proj.bias.float(),
                     delta_softplus=True,
                 )
-                out_b = mamba_inner_fn_no_out_proj(
+                out_b = mamba_inner_fn(
                     xz.flip([-1]),
                     self.conv1d_b.weight,
                     self.conv1d_b.bias,
@@ -970,7 +970,7 @@ class G_GL_Mamba(nn.Module):
             if self.bimamba_type == "v2":
                 A_b = -torch.exp(self.A_b_log.float())
                 A_g = -torch.exp(self.A_g_log.float())
-                out = mamba_inner_fn_no_out_proj(
+                out = mamba_inner_fn(
                     xz,
                     self.conv1d.weight,
                     self.conv1d.bias,
@@ -983,7 +983,7 @@ class G_GL_Mamba(nn.Module):
                     delta_bias=self.dt_proj.bias.float(),
                     delta_softplus=True,
                 )
-                out_b = mamba_inner_fn_no_out_proj(
+                out_b = mamba_inner_fn(
                     xz.flip([-1]),
                     self.conv1d_b.weight,
                     self.conv1d_b.bias,
@@ -996,7 +996,7 @@ class G_GL_Mamba(nn.Module):
                     delta_bias=self.dt_proj_b.bias.float(),
                     delta_softplus=True,
                 )
-                out_g = mamba_inner_fn_no_out_proj(
+                out_g = mamba_inner_fn(
                     another_xz,
                     self.conv1d_g.weight,
                     self.conv1d_g.bias,
