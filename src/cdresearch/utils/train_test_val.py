@@ -13,8 +13,8 @@ def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=Fa
         # concat X along channel
         if X_scale_mode == "divide":
             X_batch = X_batch.float() / 255.0
-        elif X_scale_mode == "fixed":
-            X_batch = (T.ToTensor()(X_batch.float()) * 2) - 1
+        elif X_scale_mode == "fixed": # scale to [-1, 1]
+            X_batch = (((X_batch - X_batch.min())/ X_batch.max()) * 2) - 1
 
         # access each X and y member in pair
         X_batch = X_batch.permute(1, 0, 2, 3, 4)
