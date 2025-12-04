@@ -222,6 +222,8 @@ class ConvMamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
+                    None, 
+                    None,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
@@ -235,6 +237,8 @@ class ConvMamba(nn.Module):
                     self.conv1d_b.bias,
                     self.x_proj_b.weight,
                     self.dt_proj_b.weight,
+                    None,
+                    None,
                     A_b,
                     None,
                     None,
@@ -597,6 +601,8 @@ class L_GF_Mamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
+                    None,
+                    None,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
@@ -610,6 +616,8 @@ class L_GF_Mamba(nn.Module):
                     self.conv1d_b.bias,
                     self.x_proj_b.weight,
                     self.dt_proj_b.weight,
+                    None,
+                    None,
                     A_b,
                     None,
                     None,
@@ -976,6 +984,8 @@ class G_GL_Mamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
+                    None,
+                    None,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
@@ -989,6 +999,8 @@ class G_GL_Mamba(nn.Module):
                     self.conv1d_b.bias,
                     self.x_proj_b.weight,
                     self.dt_proj_b.weight,
+                    None,
+                    None,
                     A_b,
                     None,
                     None,
@@ -1002,6 +1014,8 @@ class G_GL_Mamba(nn.Module):
                     self.conv1d_g.bias,
                     self.x_proj_g.weight,
                     self.dt_proj_g.weight,
+                    None,
+                    None,
                     A_g,
                     None,
                     None,
