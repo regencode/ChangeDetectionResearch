@@ -1,5 +1,6 @@
 from typing import Optional
 import torch
+import torchvision.transforms as T
 from .metrics import calculate_metrics
 from .display import display_during_inference
 
@@ -8,9 +9,12 @@ def y_to_binary(y):
     y_binary[y != 0] = 1
     return y_binary
 
-def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=False, device="cuda", **kwargs):
+def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=False, device="cuda", X_scale_mode="divide", **kwargs):
         # concat X along channel
-        X_batch = X_batch.float() / 255.0
+        if X_scale_mode == "divide":
+            X_batch = X_batch.float() / 255.0
+        elif X_scale_mode == "fixed":
+            X_batch = (T.ToTensor(X_batch) * 2) - 1
 
         # access each X and y member in pair
         X_batch = X_batch.permute(1, 0, 2, 3, 4)
