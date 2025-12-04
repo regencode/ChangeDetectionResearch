@@ -16,7 +16,7 @@ from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, mamba_inne
 
 from mamba_ssm.ops.triton.selective_state_update import selective_state_update
 
-from mamba_ssm.ops.triton.layernorm import RMSNorm, layer_norm_fn, rms_norm_fn
+from mamba_ssm.ops.triton.layer_norm import RMSNorm, layer_norm_fn, rms_norm_fn
 
 class LightweightModel(nn.Module):
     def __init__(self, in_channels, out_channels):
