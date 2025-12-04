@@ -35,19 +35,19 @@ def batch_inference(model, X_batch, y_batch, binary_loss_fn, optimizer, train=Fa
         return loss.item(), y_binary, outputs_binary
 
 
-def train_one_epoch(model, dataloader, optimizer, loss_fn, device="cuda"):
+def train_one_epoch(model, dataloader, optimizer, loss_fn, device="cuda", X_scale_mode="divide"):
     model.train()  # Set the model to training mode
     running_loss = 0.0
     batch_losses = []
     for i, (X_batch, y_batch) in enumerate(dataloader):
-        loss, *_ = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=True, device=device)
+        loss, *_ = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=True, device=device, X_scale_mode=X_scale_mode)
         running_loss += loss
         print(f"\r[Train {i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
         batch_losses.append(loss)
 
     return running_loss / len(dataloader), batch_losses
 
-def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_inference=False):
+def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_inference=False, X_scale_mode="divide"):
     model.eval()  # Set the model to training mode
     running_loss = 0.0
     batch_losses = []
@@ -60,7 +60,7 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_infere
 
     with torch.no_grad():
         for i, (X_batch, y_batch) in enumerate(dataloader):
-            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False, device=device)
+            loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False, device=device, X_scale_mode=X_scale_mode)
             running_loss += loss
             print(f"\r[Test{i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
             batch_losses.append(loss)
