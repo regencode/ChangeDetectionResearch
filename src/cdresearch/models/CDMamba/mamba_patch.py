@@ -179,9 +179,9 @@ class MambaInnerFn(torch.autograd.Function):
         dx, dz = dxz.chunk(2, dim=1)
         # dout (8, 32, 65536)
         # out_proj (32, 16)
-        dout = rearrange(dout, "b e l -> b l d")
+        dout = rearrange(dout, "b e l -> b l e")
         dout = F.linear(dout, out_proj_weight, out_proj_bias)
-        dout = rearrange(dout, "b e l -> e (b l)")
+        dout = rearrange(dout, "b l e -> e (b l)")
         dout_y = rearrange(dout, "d (b l) -> b d l", l=L)
         dconv1d_out, ddelta, dA, dB, dC, dD, ddelta_bias, dz, out_z = selective_scan_cuda.bwd(
             conv1d_out, delta, A, B, C, D, z, delta_bias, dout_y, scan_intermediates, out, dz,
