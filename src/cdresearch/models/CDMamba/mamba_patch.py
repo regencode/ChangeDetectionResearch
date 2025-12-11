@@ -131,7 +131,7 @@ class MambaInnerFn(torch.autograd.Function):
         if checkpoint_lvl >= 1:  # Will recompute conv1d_out and delta in the backward pass
             conv1d_out, delta = None, None
         ctx.save_for_backward(xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight,
-                              delta_proj_weight, out_proj_weight, conv1d_out, delta,
+                              delta_proj_weight, out_proj_weight, out_proj_bias, conv1d_out, delta,
                               A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out)
         return out_z
 
@@ -140,7 +140,7 @@ class MambaInnerFn(torch.autograd.Function):
     def backward(ctx, dout):
         # dout: (batch, dim, seqlen)
         assert causal_conv1d_fwd_function is not None, "causal_conv1d_cuda is not available. Please install causal-conv1d."
-        (xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight, delta_proj_weight, out_proj_weight,
+        (xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight, delta_proj_weight, out_proj_weight, out_proj_bias,
          conv1d_out, delta, A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out) = ctx.saved_tensors
         L = xz.shape[-1]
         delta_rank = delta_proj_weight.shape[1]
@@ -179,6 +179,8 @@ class MambaInnerFn(torch.autograd.Function):
         dx, dz = dxz.chunk(2, dim=1)
         # dout (8, 32, 65536)
         # out_proj (32, 16)
+        dout = rearrange(dout, "b e l -> b l d")
+        dout = F.linear(dout, out_proj_weight, out_proj_bias)
         dout = rearrange(dout, "b e l -> e (b l)")
         dout_y = rearrange(dout, "d (b l) -> b d l", l=L)
         dconv1d_out, ddelta, dA, dB, dC, dD, ddelta_bias, dz, out_z = selective_scan_cuda.bwd(
