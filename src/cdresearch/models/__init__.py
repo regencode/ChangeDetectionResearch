@@ -7,11 +7,11 @@ from .changeformer import ChangeFormer
 __all__ = ["FC_EF", "HRSCD_str4"]
 
 __mamba__ = {
-    'CDMamba': 'cdresearch.models.CDMamba',
+    'CDMamba': 'cdresearch.models',
 }
 
 if typing.TYPE_CHECKING:
-    from cdresearch.models.CDMamba.CDMamba import CDMamba
+    from cdresearch.models.CDMamba import CDMamba
 
 def __getattr__(name: str):
     if name in __mamba__:
