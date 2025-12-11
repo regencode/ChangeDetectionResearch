@@ -133,12 +133,11 @@ class MambaInnerFn(torch.autograd.Function):
         ctx.save_for_backward(xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight,
                               delta_proj_weight, out_proj_weight, conv1d_out, delta,
                               A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out)
-        return out_z
 
     @staticmethod
     @custom_bwd
     def backward(ctx, dout):
-        # dout: (batch, seqlen, dim)
+        # dout: (batch, dim, seqlen)
         assert causal_conv1d_fwd_function is not None, "causal_conv1d_cuda is not available. Please install causal-conv1d."
         (xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight, delta_proj_weight, out_proj_weight,
          conv1d_out, delta, A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out) = ctx.saved_tensors
@@ -177,14 +176,11 @@ class MambaInnerFn(torch.autograd.Function):
         # backward of selective_scan_cuda with the backward of chunk).
         dxz = torch.empty_like(xz)  # (batch, dim, seqlen)
         dx, dz = dxz.chunk(2, dim=1)
-        # dout (8, 65536, 32)
+        # dout (8, 32, 65536)
         # out_proj (32, 16)
         print("dout.shape before rearrange:", dout.shape)
-        dout = rearrange(dout, "b l e -> e (b l)")
+        dout = rearrange(dout, "b e l -> e (b l)")
         print("dout.shape after rearrange:", dout.shape)
-        # expected: dout (32, 65536*8)
-        # but somehow...
-        # dout (32*8, 65536)
         dout_y = rearrange(out_proj_weight.t() @ dout, "d (b l) -> b d l", l=L)
         dconv1d_out, ddelta, dA, dB, dC, dD, ddelta_bias, dz, out_z = selective_scan_cuda.bwd(
             conv1d_out, delta, A, B, C, D, z, delta_bias, dout_y, scan_intermediates, out, dz,
