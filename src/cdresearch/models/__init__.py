@@ -7,7 +7,7 @@ from .changeformer import ChangeFormer
 __all__ = ["FC_EF", "HRSCD_str4"]
 
 __mamba__ = {
-    'CDMamba': 'cdresearch.models',
+    'CDMamba': 'cdresearch.models.CDMamba',
 }
 
 if typing.TYPE_CHECKING:
