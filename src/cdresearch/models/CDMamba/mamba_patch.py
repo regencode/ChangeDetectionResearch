@@ -130,8 +130,9 @@ class MambaInnerFn(torch.autograd.Function):
         ctx.b_c_dt_rms_eps = b_c_dt_rms_eps
         if checkpoint_lvl >= 1:  # Will recompute conv1d_out and delta in the backward pass
             conv1d_out, delta = None, None
+        out_z_proj = F.linear(rearrange(out_z, "b d l -> b l d"), out_proj_weight, out_proj_bias)
         ctx.save_for_backward(xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight,
-                              delta_proj_weight, out_proj_weight, out_proj_bias, conv1d_out, delta,
+                              delta_proj_weight, out_proj_weight, out_z_proj, conv1d_out, delta,
                               A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out)
         return out_z
 
@@ -140,12 +141,13 @@ class MambaInnerFn(torch.autograd.Function):
     def backward(ctx, dout):
         # dout: (batch, dim, seqlen)
         assert causal_conv1d_fwd_function is not None, "causal_conv1d_cuda is not available. Please install causal-conv1d."
-        (xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight, delta_proj_weight, out_proj_weight, out_proj_bias,
+        (xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight, delta_proj_weight, out_proj_weight, out_z_proj,
          conv1d_out, delta, A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out) = ctx.saved_tensors
         L = xz.shape[-1]
         delta_rank = delta_proj_weight.shape[1]
         d_state = A.shape[-1] * (1 if not A.is_complex() else 2)
         x, z = xz.chunk(2, dim=1)
+        dout = out_z_proj
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         if ctx.checkpoint_lvl == 1:
@@ -179,10 +181,8 @@ class MambaInnerFn(torch.autograd.Function):
         dx, dz = dxz.chunk(2, dim=1)
         # dout (8, 32, 65536)
         # out_proj (32, 16)
-        dout = rearrange(dout, "b e l -> b l e")
-        dout = F.linear(dout, out_proj_weight, out_proj_bias)
         dout = rearrange(dout, "b l e -> e (b l)")
-        dout_y = rearrange(dout, "d (b l) -> b d l", l=L)
+        dout_y = rearrange(out_proj_weight.t() @ dout, "d (b l) -> b d l", l=L)
         dconv1d_out, ddelta, dA, dB, dC, dD, ddelta_bias, dz, out_z = selective_scan_cuda.bwd(
             conv1d_out, delta, A, B, C, D, z, delta_bias, dout_y, scan_intermediates, out, dz,
             ctx.delta_softplus,
