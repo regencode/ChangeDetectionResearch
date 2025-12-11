@@ -222,6 +222,8 @@ class ConvMamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
+                    self.out_proj.weight,
+                    self.out_proj.bias,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
