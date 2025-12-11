@@ -131,6 +131,7 @@ class MambaInnerFn(torch.autograd.Function):
         if checkpoint_lvl >= 1:  # Will recompute conv1d_out and delta in the backward pass
             conv1d_out, delta = None, None
         out_z_proj = F.linear(rearrange(out_z, "b d l -> b l d"), out_proj_weight, out_proj_bias)
+        out_z_proj = F.rms_norm(out_z_proj, normalized_shape=out_z_proj.shape[-2:])
         ctx.save_for_backward(xz, conv1d_weight, conv1d_bias, x_dbl, x_proj_weight,
                               delta_proj_weight, out_proj_weight, out_z_proj, conv1d_out, delta,
                               A, B, C, D, delta_bias, scan_intermediates, b_rms_weight, c_rms_weight, dt_rms_weight, out)
