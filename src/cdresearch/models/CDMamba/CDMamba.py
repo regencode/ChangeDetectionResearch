@@ -379,10 +379,11 @@ class CDMamba(nn.Module):
 
 if __name__ == "__main__":
     device = "cuda:2"
-    CDMamba = CDMamba(spatial_dims=2, in_channels=3, out_channels=2, init_filters=16, norm=("GROUP", {"num_groups": 8}),
+    model = CDMamba(spatial_dims=2, in_channels=3, out_channels=2, init_filters=16, norm=("GROUP", {"num_groups": 8}),
                     mode="AGLGF", conv_mode='orignal', local_query_model="orignal_dinner",
                     stage=4, mamba_act="silu", up_mode="SRCM", up_conv_mode='deepwise', blocks_down=(1, 2, 2, 4), blocks_up=(1, 1, 1),
                     resdiual=False, diff_abs="later").to(device)
+
     x = torch.randn(1, 3, 256, 256).to(device)
-    y = CDMamba(x, x)
+    y = model(x, x)
     print(y.shape)
