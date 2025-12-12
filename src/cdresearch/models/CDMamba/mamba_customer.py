@@ -222,8 +222,6 @@ class ConvMamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
@@ -237,8 +235,6 @@ class ConvMamba(nn.Module):
                     self.conv1d_b.bias,
                     self.x_proj_b.weight,
                     self.dt_proj_b.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A_b,
                     None,
                     None,
@@ -601,8 +597,6 @@ class L_GF_Mamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
@@ -616,8 +610,6 @@ class L_GF_Mamba(nn.Module):
                     self.conv1d_b.bias,
                     self.x_proj_b.weight,
                     self.dt_proj_b.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A_b,
                     None,
                     None,
@@ -984,8 +976,6 @@ class G_GL_Mamba(nn.Module):
                     self.conv1d.bias,
                     self.x_proj.weight,
                     self.dt_proj.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A,
                     None,  # input-dependent B
                     None,  # input-dependent C
@@ -999,8 +989,6 @@ class G_GL_Mamba(nn.Module):
                     self.conv1d_b.bias,
                     self.x_proj_b.weight,
                     self.dt_proj_b.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A_b,
                     None,
                     None,
@@ -1014,8 +1002,6 @@ class G_GL_Mamba(nn.Module):
                     self.conv1d_g.bias,
                     self.x_proj_g.weight,
                     self.dt_proj_g.weight,
-                    self.out_proj.weight,
-                    self.out_proj.bias,
                     A_g,
                     None,
                     None,
