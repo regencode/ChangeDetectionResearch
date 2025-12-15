@@ -1,7 +1,4 @@
-from typing import Optional
 import torch
-import torchvision.transforms as T
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 from .metrics import calculate_metrics
 from .display import display_during_inference
