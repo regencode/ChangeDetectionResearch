@@ -1,6 +1,8 @@
 from typing import Optional
 import torch
 import torchvision.transforms as T
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 from .metrics import calculate_metrics
 from .display import display_during_inference
 
@@ -38,7 +40,7 @@ def train_one_epoch(model, dataloader, optimizer, loss_fn, device="cuda", X_scal
     model.train()  # Set the model to training mode
     running_loss = 0.0
     batch_losses = []
-    for i, (X_batch, y_batch) in enumerate(dataloader):
+    for i, (X_batch, y_batch) in enumerate(tqdm(dataloader)):
         loss, *_ = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=True, device=device, X_scale_mode=X_scale_mode)
         running_loss += loss
         print(f"\r[Train {i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
@@ -58,7 +60,7 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_infere
     stacks = [X_batch_stack, y_binary_stack, output_binary_stack]
 
     with torch.no_grad():
-        for i, (X_batch, y_batch) in enumerate(dataloader):
+        for i, (X_batch, y_batch) in enumerate(tqdm(dataloader)):
             loss, y_binary, output_binary = batch_inference(model, X_batch, y_batch, loss_fn, optimizer, train=False, device=device, X_scale_mode=X_scale_mode)
             running_loss += loss
             print(f"\r[Test{i+1}/{len(dataloader)}]Batch Loss: {loss} | Running Loss: {running_loss/(i+1)}", end="")
@@ -87,4 +89,3 @@ def test_one_epoch(model, dataloader, optimizer, loss_fn, device, display_infere
     print(" ")
     print(metrics)
     return running_loss / len(dataloader), batch_losses, metrics
-
