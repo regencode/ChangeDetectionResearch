@@ -280,6 +280,7 @@ class PatchEmbed(nn.Module):
                 nn.ReLU()
                 )
         else:
+            print("not downsampling feature map in PatchEmbed")
             self.conv_down = nn.Sequential(
                 nn.Conv2d(in_chans, in_dim, 3, 1, 1, bias=False, padding_mode="reflect"),
                 nn.BatchNorm2d(in_dim, eps=1e-4),
