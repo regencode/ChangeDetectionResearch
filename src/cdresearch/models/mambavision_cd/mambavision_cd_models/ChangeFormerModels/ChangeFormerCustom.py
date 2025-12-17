@@ -24,7 +24,7 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
 
     def to_linear(self, x):
         return ein.rearrange(x, "b c h w -> b (h w) c")
-    i
+
     def to_image(self, x):
         return ein.rearrange(x, "b (h w) c -> b c h w")
 
