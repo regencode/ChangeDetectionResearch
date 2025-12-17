@@ -1,4 +1,5 @@
 from torch import nn
+import einops as ein
 from .ChangeFormer import DecoderTransformer_v3
 from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLayer
 
@@ -21,8 +22,14 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
             nn.LayerNorm(in_chans) for in_chans in in_channels
         )
 
+    def to_linear(self, x):
+        return ein.rearrange(x, "b c h w -> b (h w) c")
+    i
+    def to_image(self, x):
+        return ein.rearrange(x, "b (h w) c -> b c h w")
+
     def forward(self, inputs1, inputs2):
         # Normalize each inputs1 and inputs2
-        inputs1 = [self.ln[i](inputs1[i]) for i in range(len(inputs1)) ]
-        inputs2 = [self.ln[i](inputs2[i]) for i in range(len(inputs2)) ]
+        inputs1 = [self.to_image(self.ln[i](self.to_linear(inputs1[i]))) for i in range(len(inputs1)) ]
+        inputs2 = [self.to_image(self.ln[i](self.to_linear(inputs2[i]))) for i in range(len(inputs2)) ]
         return super().forward(inputs1, inputs2)
