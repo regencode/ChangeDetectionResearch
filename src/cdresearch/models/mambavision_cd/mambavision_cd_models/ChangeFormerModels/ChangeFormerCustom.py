@@ -16,3 +16,13 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
             self.convd2x = nn.Identity()
         if not final_upsample[1]:
             self.convd1x = nn.Identity()
+
+        self.ln = nn.ModuleList(
+            nn.LayerNorm(in_chans) for in_chans in in_channels
+        )
+
+    def forward(self, inputs1, inputs2):
+        # Normalize each inputs1 and inputs2
+        inputs1 = [self.ln[i](inputs1[i]) for i in range(len(inputs1)) ]
+        inputs2 = [self.ln[i](inputs2[i]) for i in range(len(inputs2)) ]
+        return super().forward(inputs1, inputs2)
