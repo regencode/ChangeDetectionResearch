@@ -1467,7 +1467,9 @@ class DecoderTransformer_v3(nn.Module):
     """
     def __init__(self, input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=True, 
                     in_channels = [32, 64, 128, 256], embedding_dim= 64, output_nc=2, 
-                    decoder_softmax = False, feature_strides=[2, 4, 8, 16]):
+                    decoder_softmax = False, feature_strides=[2, 4, 8, 16], 
+                    final_upsample=False # custom
+                 ):
         super(DecoderTransformer_v3, self).__init__()
         #assert
         assert len(feature_strides) == len(in_channels)

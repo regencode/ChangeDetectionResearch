@@ -11,6 +11,7 @@ from .registry import create_model, register_pip_model, list_models
 from .CDMamba import CDMambaDecoder
 from .ChangeMambaModels import ChangeDecoder as ChangeMambaDecoder
 from .ChangeFormerModels import DecoderTransformer_v3
+from .ChangeFormerModels import DecoderTransformerCustom
 
 class ToSequenceForm(nn.Module):
     def __init__(self):
@@ -429,10 +430,16 @@ class MambaVisionCD_V2(nn.Module):
         self.dec = nn.Identity()
         self.decoder_model = decoder_model
         if decoder_model.lower() == "changeformer":
+            print(f"using downsample={patchembed_downsample}")
             print(f"using dims={self.enc.dims}")
-            self.decoder = DecoderTransformer_v3(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
-                    in_channels=self.enc.dims, embedding_dim=embed_dims, output_nc=num_classes, 
-                    decoder_softmax=False, feature_strides=[2, 4, 8, 16])
+            if patchembed_downsample:
+                self.decoder = DecoderTransformerCustom(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
+                        in_channels=self.enc.dims, embedding_dim=embed_dims, output_nc=num_classes, 
+                        decoder_softmax=False, feature_strides=[2, 4, 8, 16], final_upsample=[True, True])
+            else:
+                self.decoder = DecoderTransformerCustom(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
+                        in_channels=self.enc.dims, embedding_dim=embed_dims, output_nc=num_classes, 
+                        decoder_softmax=False, feature_strides=[2, 4, 8, 16], final_upsample=[False, False])
 
         elif decoder_model.lower() == "changemamba":
             from .ChangeMambaModels.models.vmamba import LayerNorm2d
