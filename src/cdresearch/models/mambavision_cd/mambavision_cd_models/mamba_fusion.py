@@ -408,7 +408,7 @@ class MambaVisionCD_V2(nn.Module):
                  **kwargs):
         super().__init__()
         if encoder_model is not None:
-            self.enc = create_model(encoder_model, in_chans=in_chans, **kwargs)
+            self.enc = create_model(encoder_model, in_chans=in_chans, patchembed_downsample=patchembed_downsample, **kwargs)
         else:
             self.enc = MambaVision(
                      in_chans,
