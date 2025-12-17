@@ -428,6 +428,7 @@ class MambaVisionCD_V2(nn.Module):
                      patchembed_downsample=patchembed_downsample
             )
         self.dec = nn.Identity()
+        self.decoder_model = decoder_model
         if decoder_model.lower() == "changeformer":
             print(f"using downsample={patchembed_downsample}")
             print(f"using dims={self.enc.dims}")
