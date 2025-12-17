@@ -1,6 +1,6 @@
 from torch import nn
 import einops as ein
-from .ChangeFormer import DecoderTransformer_v3
+from .ChangeFormer import DecoderTransformer_v3, MLP
 from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLayer
 
 class DecoderTransformerCustom(DecoderTransformer_v3):
@@ -17,19 +17,28 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
             self.convd2x = nn.Identity()
         if not final_upsample[1]:
             self.convd1x = nn.Identity()
+        c1_in_channels, c2_in_channels, c3_in_channels, c4_in_channels = in_channels
 
-        self.ln = nn.ModuleList(
-            nn.LayerNorm(in_chans) for in_chans in in_channels
+        self.linear_c4 = nn.Sequential(
+                MLP(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
+                nn.LayerNorm(self.embedding_dim),
+                nn.ReLU()
         )
-
-    def layer_norm(self, x, depth):
-        B, C, H, W = x.shape
-        x = ein.rearrange(x, "b c h w -> b (h w) c")
-        x = self.ln[depth](x)
-        return ein.rearrange(x, "b (h w) c -> b c h w", h=H, w=W)
-
+        self.linear_c3 = nn.Sequential(
+                MLP(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
+                nn.LayerNorm(self.embedding_dim),
+                nn.ReLU()
+        )
+        self.linear_c2 = nn.Sequential(
+                MLP(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
+                nn.LayerNorm(self.embedding_dim),
+                nn.ReLU()
+        )
+        self.linear_c1 = nn.Sequential(
+                MLP(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
+                nn.LayerNorm(self.embedding_dim),
+                nn.ReLU()
+        )
     def forward(self, inputs1, inputs2):
-        # Normalize each inputs1 and inputs2
-        inputs1 = [self.layer_norm(inputs1[i], i) for i in range(len(inputs1))]
-        inputs2 = [self.layer_norm(inputs2[i], i) for i in range(len(inputs2))]
+        # inputs are normalize with linear_c1 to c4
         return super().forward(inputs1, inputs2)
