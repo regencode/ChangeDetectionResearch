@@ -22,14 +22,14 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
             nn.LayerNorm(in_chans) for in_chans in in_channels
         )
 
-    def to_linear(self, x):
-        return ein.rearrange(x, "b c h w -> b (h w) c")
-
-    def to_image(self, x):
-        return ein.rearrange(x, "b (h w) c -> b c h w")
+    def layer_norm(self, x, depth):
+        B, C, H, W = x.shape
+        x = ein.rearrange(x, "b c h w -> b (h w) c")
+        x = self.ln[depth](x)
+        return ein.rearrange(x, "b (h w) c -> b c h w", h=H, w=W)
 
     def forward(self, inputs1, inputs2):
         # Normalize each inputs1 and inputs2
-        inputs1 = [self.to_image(self.ln[i](self.to_linear(inputs1[i]))) for i in range(len(inputs1)) ]
-        inputs2 = [self.to_image(self.ln[i](self.to_linear(inputs2[i]))) for i in range(len(inputs2)) ]
+        inputs1 = [self.layer_norm(inputs1[i], i) for i in range(len(inputs1))]
+        inputs2 = [self.layer_norm(inputs2[i], i) for i in range(len(inputs2))]
         return super().forward(inputs1, inputs2)
