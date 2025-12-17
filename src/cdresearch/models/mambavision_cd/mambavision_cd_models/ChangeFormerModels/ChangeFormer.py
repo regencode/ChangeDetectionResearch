@@ -1476,6 +1476,7 @@ class DecoderTransformer_v3(nn.Module):
         assert min(feature_strides) == feature_strides[0]
         
         #settings
+        print(f"decoder in_channels: {in_channels}")
         self.feature_strides = feature_strides
         self.input_transform = input_transform
         self.in_index        = in_index
