@@ -860,25 +860,24 @@ def mamba_vision_B(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 10, 5])
     num_heads = kwargs.pop("num_heads", [2, 4, 8, 16])
     window_size = kwargs.pop("window_size", [8, 8, 14, 7])
-    dim = kwargs.pop("dim", 128)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [128, 128*2, 128*4, 128*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
-    resolution = kwargs.pop("resolution", 224)
+    resolution = kwargs.pop("resolution", 256)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.3)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_B').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
                         layer_scale=layer_scale,
                         layer_scale_conv=None,
                         **kwargs)
+
     model.pretrained_cfg = pretrained_cfg
     model.default_cfg = model.pretrained_cfg
     if pretrained:
@@ -896,19 +895,17 @@ def mamba_vision_B_21k(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 10, 5])
     num_heads = kwargs.pop("num_heads", [2, 4, 8, 16])
     window_size = kwargs.pop("window_size", [8, 8, 14, 7])
-    dim = kwargs.pop("dim", 128)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [128, 128*2, 128*4, 128*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
-    resolution = kwargs.pop("resolution", 224)
+    resolution = kwargs.pop("resolution", 256)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.3)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_B_21k').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
@@ -932,19 +929,17 @@ def mamba_vision_L(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 10, 5])
     num_heads = kwargs.pop("num_heads", [4, 8, 16, 32])
     window_size = kwargs.pop("window_size", [8, 8, 14, 7])
-    dim = kwargs.pop("dim", 196)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [196, 196*2, 196*4, 196*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
-    resolution = kwargs.pop("resolution", 224)
+    resolution = kwargs.pop("resolution", 256)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.3)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_L').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
@@ -968,19 +963,17 @@ def mamba_vision_L_21k(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 10, 5])
     num_heads = kwargs.pop("num_heads", [4, 8, 16, 32])
     window_size = kwargs.pop("window_size", [8, 8, 14, 7])
-    dim = kwargs.pop("dim", 196)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [196, 196*2, 196*4, 196*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
-    resolution = kwargs.pop("resolution", 224)
+    resolution = kwargs.pop("resolution", 256)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.3)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_L_21k').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
@@ -1004,19 +997,17 @@ def mamba_vision_L2(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 12, 5])
     num_heads = kwargs.pop("num_heads", [4, 8, 16, 32])
     window_size = kwargs.pop("window_size", [8, 8, 14, 7])
-    dim = kwargs.pop("dim", 196)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [196, 196*2, 196*4, 196*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
-    resolution = kwargs.pop("resolution", 224)
+    resolution = kwargs.pop("resolution", 256)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.3)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_L2').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
@@ -1040,19 +1031,17 @@ def mamba_vision_L2_512_21k(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 12, 5])
     num_heads = kwargs.pop("num_heads", [4, 8, 16, 32])
     window_size = kwargs.pop("window_size", [8, 8, 32, 16])
-    dim = kwargs.pop("dim", 196)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [196, 196*2, 196*4, 196*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
     resolution = kwargs.pop("resolution", 512)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.3)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_L2_512_21k').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
@@ -1076,19 +1065,17 @@ def mamba_vision_L3_256_21k(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 20, 10])
     num_heads = kwargs.pop("num_heads", [4, 8, 16, 32])
     window_size = kwargs.pop("window_size", [8, 8, 16, 8])
-    dim = kwargs.pop("dim", 256)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [196, 196*2, 196*4, 196*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
     resolution = kwargs.pop("resolution", 256)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.5)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_L3_256_21k').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
@@ -1112,19 +1099,17 @@ def mamba_vision_L3_512_21k(pretrained=False, **kwargs):
     depths = kwargs.pop("depths", [3, 3, 20, 10])
     num_heads = kwargs.pop("num_heads", [4, 8, 16, 32])
     window_size = kwargs.pop("window_size", [8, 8, 32, 16])
-    dim = kwargs.pop("dim", 256)
-    in_dim = kwargs.pop("in_dim", 64)
+    dims = kwargs.pop("dims", [196, 196*2, 196*4, 196*8])
     mlp_ratio = kwargs.pop("mlp_ratio", 4)
     resolution = kwargs.pop("resolution", 512)
     drop_path_rate = kwargs.pop("drop_path_rate", 0.5)
     layer_scale = kwargs.pop("layer_scale", 1e-5)
     pretrained_cfg = resolve_pretrained_cfg('mamba_vision_L3_512_21k').to_dict()
     update_args(pretrained_cfg, kwargs, kwargs_filter=None)
-    model = MambaVision(depths=depths,
+    model = MambaVision(dims=dims,
+                        depths=depths,
                         num_heads=num_heads,
                         window_size=window_size,
-                        dim=dim,
-                        in_dim=in_dim,
                         mlp_ratio=mlp_ratio,
                         resolution=resolution,
                         drop_path_rate=drop_path_rate,
