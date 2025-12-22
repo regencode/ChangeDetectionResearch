@@ -54,9 +54,10 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256)):
     print("Data patchify complete")
 
 class WHU_CD_Dataset(BaseDataset):
-    def __init__(self, root="./LEVIR_CD", split="train", pair_transforms=None, return_y_image=False):
+    def __init__(self, root="./WHU_CD", split="train", pair_transforms=None, return_y_image=False):
         '''
         assume data is already patchified.
+        splits: train, test
         '''
 
         x1_dir = f"{root}/{split}/A/"
