@@ -2,6 +2,29 @@ import torch
 import cv2 as cv
 from torch.utils.data import Dataset
 
+# Preprocessing: Patchify
+class Patchify:
+    def __init__(self, ph=256, pw=256):
+        self.ph = ph
+        self.pw = pw
+    def __call__(self, x):
+        '''
+        from image of shape (C, H, W),
+        return tensor of shape (N, C, new_H, new_W)
+        where N is the number of patches in the input image
+        '''
+        C, H, W = x.shape
+
+        ph = self.ph
+        pw = self.pw
+        x = x.unsqueeze(0)
+
+        x = x.unfold(2, ph, ph).unfold(3, pw, pw)
+
+        assert x.shape == (1, C, H//ph, W//pw, ph, pw), x.shape
+        x = x.permute(0, 2, 3, 1, 4, 5).reshape(-1, C, ph, pw)
+        return x
+
 class BaseDataset(Dataset):
     def __init__(self, x1, x2, y, pair_transforms=None, return_y_image=False):
         self.x1 = x1

@@ -6,24 +6,20 @@ import cv2 as cv
 from .base_dataset import BaseDataset, Patchify
 from torchvision.utils import save_image
 
-
-def load_levir(drive_path, patchify=False, patch_size=(256, 256)):
+def load_whu(drive_path, patchify=False, patch_size=(256, 256)):
     DATA_SOURCE = drive_path
-    DATA_DEST = "./LEVIR_CD"
-    DATA_PATCH_FOLDER = "./LEVIR_CD_patched/"
+    DATA_DEST = "./WHU_CD"
+    DATA_PATCH_FOLDER = "./WHU_CD_PATCHED/"
 
     if os.path.exists(DATA_DEST):
         print("Data patch folder already exists! Skipping loading and unzipping data...")
         return
 
     os.makedirs(DATA_DEST)
-    data_splits = glob.glob(DATA_SOURCE + "*.zip")
-    for split in data_splits:
-        dest = shutil.copy(split, DATA_DEST)
-        os.makedirs(DATA_DEST + "/" + dest.split("/")[-1][:-4])
-        with zipfile.ZipFile(split, 'r') as z:
-            z.extractall(DATA_DEST + "/" + dest.split("/")[-1][:-4])
-        print("Data load and unzip complete")
+    dest = shutil.copy(DATA_SOURCE, DATA_DEST)
+    with zipfile.ZipFile(dest, 'r') as z:
+        z.extractall(DATA_DEST + "/" + dest.split("/")[-1][:-4])
+    print("Data load and unzip complete")
 
     if not patchify:
         print("Skip patchify data (patchify == False)")
@@ -36,26 +32,32 @@ def load_levir(drive_path, patchify=False, patch_size=(256, 256)):
     os.makedirs(DATA_PATCH_FOLDER)
     os.makedirs(DATA_PATCH_FOLDER + "train/")
     os.makedirs(DATA_PATCH_FOLDER + "test/")
-    os.makedirs(DATA_PATCH_FOLDER + "val/")
     for split in os.listdir(DATA_PATCH_FOLDER):
-        split_path = DATA_PATCH_FOLDER + "/" + split
+        split_path = os.path.join(DATA_PATCH_FOLDER, split)
         os.makedirs(split_path + "/" + "A/")
         os.makedirs(split_path + "/" + "B/")
         os.makedirs(split_path + "/" + "label/")
+        image_dict = {
+            "A": os.path.join(DATA_DEST, f"/1. The two-period image data/2012/whole_image/{split}/image/2012_{split}.tif"),
+            "B": os.path.join(DATA_DEST, f"/1. The two-period image data/2016/whole_image/{split}/image/2016_{split}.tif"),
+            "label": os.path.join(DATA_DEST, f"1. The two-period image data/change_label/{split}/change_label.tif")
+        }
         for subsplit in os.listdir(split_path):
-            subsplit_path = split_path + "/" + subsplit
-
-            for image_path in glob.glob(DATA_DEST + "/" + split + "/" + subsplit + "/*.png"):
-                img = torch.from_numpy(cv.imread(image_path)).permute(2, 0, 1)
-                # patchify
-                img = patcher(img)
-                for i, patch in enumerate(img):
-                    save_image(patch.float()/255.0, subsplit_path + "/" + image_path.split("/")[-1][:-4] + f"_{i}.png")
+            subsplit_path =  os.path.join(split_path, subsplit)
+            image_path = image_dict[subsplit]
+            img = torch.from_numpy(cv.imread(image_path)).permute(2, 0, 1)
+            # patchify
+            img = patcher(img)
+            for i, patch in enumerate(img):
+                save_image(patch.float()/255.0, os.path.join(subsplit_path, image_path.split("/")[-1][:-4] + f"_{i}.png"))
 
     print("Data patchify complete")
 
-class LEVIR_CD_Dataset(BaseDataset):
+class WHU_CD_Dataset(BaseDataset):
     def __init__(self, root="./LEVIR_CD", split="train", pair_transforms=None, return_y_image=False):
+        '''
+        assume data is already patchified.
+        '''
 
         x1_dir = f"{root}/{split}/A/"
         x2_dir = f"{root}/{split}/B/"
@@ -66,5 +68,6 @@ class LEVIR_CD_Dataset(BaseDataset):
         mask_paths = glob.glob(f"{mask_dir}/*.png")
 
         super().__init__(x1_paths, x2_paths, mask_paths, pair_transforms, return_y_image)
+
 
 
