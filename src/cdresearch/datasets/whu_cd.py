@@ -8,7 +8,10 @@ from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
 from .base_dataset import BaseDataset, Patchify
 
-def load_whu(drive_path, patchify=False, patch_size=(256, 256)):
+def get_module_dir():
+    return os.path.dirname(os.path.abspath(__file__))
+
+def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=True):
     MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
     DATA_SOURCE = drive_path
     DATA_DEST = f"{MODULE_DIR}/WHU_CD"
@@ -53,12 +56,14 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256)):
             # patchify
             img = patcher(img)
             for i, patch in enumerate(img):
-                save_image(patch.float()/255.0, os.path.join(subsplit_path, image_path.split("/")[-1][:-4] + f"_{i}.png"))
+                save_dest = os.path.join(subsplit_path, image_path.split("/")[-1][:-4] + f"_{i}.png")
+                print(f"Saving image {save_dest}")
+                save_image(patch.float()/255.0, save_dest)
 
     print("Data patchify complete")
 
 class WHU_CD_Dataset(BaseDataset):
-    def __init__(self, root="./WHU_CD", split="train", pair_transforms=None, return_y_image=False):
+    def __init__(self, root=f"{get_module_dir()}/WHU-CD", split="train", pair_transforms=None, return_y_image=False):
         '''
         assume data is already patchified.
         splits: train, test
