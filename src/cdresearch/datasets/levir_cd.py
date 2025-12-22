@@ -61,7 +61,7 @@ class LEVIR_CD_Dataset(BaseDataset):
     def __init__(self, root=f"{get_module_dir()}/LEVIR_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False):
         '''
         assume data is already patchified.
-        splits: train, test
+        splits: train, test, val
         '''
 
         x1_dir = f"{root}/{split}/A/"

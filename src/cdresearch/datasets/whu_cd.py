@@ -5,6 +5,7 @@ import torch
 import cv2 as cv
 from torchvision.utils import save_image
 from .base_dataset import BaseDataset, Patchify, get_module_dir
+from sklearn.model_selection import train_test_split
 
 
 def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
@@ -59,12 +60,12 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
     print("Data patchify complete")
 
 class WHU_CD_Dataset(BaseDataset):
-    def __init__(self, root=f"{get_module_dir()}/WHU_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False):
+    def __init__(self, root=f"{get_module_dir()}/WHU_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False, return_path_list_instead=False):
         '''
         assume data is already patchified.
         splits: train, test
         '''
-
+            
         x1_dir = f"{root}/{split}/A/"
         x2_dir = f"{root}/{split}/B/"
         mask_dir = f"{root}/{split}/label/"
@@ -72,5 +73,8 @@ class WHU_CD_Dataset(BaseDataset):
         x1_paths = glob.glob(f"{x1_dir}/*.png")
         x2_paths = glob.glob(f"{x2_dir}/*.png")
         mask_paths = glob.glob(f"{mask_dir}/*.png")
+        
+        if return_path_list_instead:
+            return x1_paths, x2_paths, mask_paths
 
         super().__init__(x1_paths, x2_paths, mask_paths, pair_transforms, return_y_image)
