@@ -6,6 +6,9 @@ import cv2 as cv
 from torchvision.utils import save_image
 from .base_dataset import BaseDataset, Patchify, get_module_dir
 from sklearn.model_selection import train_test_split
+import glob
+import re
+
 
 
 def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
@@ -59,14 +62,20 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
 
     print("Data patchify complete")
 
+def sort_by_last_number(path):
+    stem = os.path.splitext(os.path.basename(path))[0]  # 2021_10
+    last_num = stem.split("_")[-1]
+    return int(last_num)
+
 def load_paths(split, root=f"{get_module_dir()}/WHU_CD_PATCHED"):
+
     x1_dir = f"{root}/{split}/A/"
     x2_dir = f"{root}/{split}/B/"
     mask_dir = f"{root}/{split}/label/"
 
-    x1_paths = glob.glob(f"{x1_dir}/*.png")
-    x2_paths = glob.glob(f"{x2_dir}/*.png")
-    mask_paths = glob.glob(f"{mask_dir}/*.png")
+    x1_paths = sorted(glob.glob(f"{x1_dir}/*.png"), key=sort_by_last_number)
+    x2_paths = sorted(glob.glob(f"{x2_dir}/*.png"), key=sort_by_last_number)
+    mask_paths = sorted(glob.glob(f"{mask_dir}/*.png"), key=sort_by_last_number)
     
     return x1_paths, x2_paths, mask_paths
 
@@ -81,8 +90,8 @@ class WHU_CD_Dataset(BaseDataset):
         x2_dir = f"{root}/{split}/B/"
         mask_dir = f"{root}/{split}/label/"
 
-        x1_paths = glob.glob(f"{x1_dir}/*.png")
-        x2_paths = glob.glob(f"{x2_dir}/*.png")
-        mask_paths = glob.glob(f"{mask_dir}/*.png")
+        x1_paths = sorted(glob.glob(f"{x1_dir}/*.png"), key=sort_by_last_number)
+        x2_paths = sorted(glob.glob(f"{x2_dir}/*.png"), key=sort_by_last_number)
+        mask_paths = sorted(glob.glob(f"{mask_dir}/*.png"), key=sort_by_last_number)
         
         super().__init__(x1_paths, x2_paths, mask_paths, pair_transforms, return_y_image)
