@@ -59,8 +59,19 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
 
     print("Data patchify complete")
 
+def load_paths(split, root=f"{get_module_dir()}/WHU_CD_PATCHED"):
+    x1_dir = f"{root}/{split}/A/"
+    x2_dir = f"{root}/{split}/B/"
+    mask_dir = f"{root}/{split}/label/"
+
+    x1_paths = glob.glob(f"{x1_dir}/*.png")
+    x2_paths = glob.glob(f"{x2_dir}/*.png")
+    mask_paths = glob.glob(f"{mask_dir}/*.png")
+    
+    return x1_paths, x2_paths, mask_paths
+
 class WHU_CD_Dataset(BaseDataset):
-    def __init__(self, root=f"{get_module_dir()}/WHU_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False, return_path_list_instead=False):
+    def __init__(self, root=f"{get_module_dir()}/WHU_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False):
         '''
         assume data is already patchified.
         splits: train, test
@@ -74,7 +85,4 @@ class WHU_CD_Dataset(BaseDataset):
         x2_paths = glob.glob(f"{x2_dir}/*.png")
         mask_paths = glob.glob(f"{mask_dir}/*.png")
         
-        if return_path_list_instead:
-            return x1_paths, x2_paths, mask_paths
-
         super().__init__(x1_paths, x2_paths, mask_paths, pair_transforms, return_y_image)
