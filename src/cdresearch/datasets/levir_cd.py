@@ -3,14 +3,15 @@ import shutil
 import zipfile
 import torch
 import cv2 as cv
-from .base_dataset import BaseDataset, Patchify
+from .base_dataset import BaseDataset, Patchify, get_module_dir
 from torchvision.utils import save_image
 
 
-def load_levir(drive_path, patchify=False, patch_size=(256, 256)):
+def load_levir(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
+    MODULE_DIR = get_module_dir()
     DATA_SOURCE = drive_path
-    DATA_DEST = "./LEVIR_CD"
-    DATA_PATCH_FOLDER = "./LEVIR_CD_patched/"
+    DATA_DEST = f"{MODULE_DIR}/LEVIR_CD"
+    DATA_PATCH_FOLDER = f"{MODULE_DIR}/LEVIR_CD_PATCHED/"
 
     if os.path.exists(DATA_DEST):
         print("Data patch folder already exists! Skipping loading and unzipping data...")
@@ -50,12 +51,18 @@ def load_levir(drive_path, patchify=False, patch_size=(256, 256)):
                 # patchify
                 img = patcher(img)
                 for i, patch in enumerate(img):
-                    save_image(patch.float()/255.0, subsplit_path + "/" + image_path.split("/")[-1][:-4] + f"_{i}.png")
+                    save_dest = subsplit_path + "/" + image_path.split("/")[-1][:-4] + f"_{i}.png"
+                    print(f"Saving image {save_dest}") if verbose else None
+                    save_image(patch.float()/255.0, save_dest)
 
     print("Data patchify complete")
 
 class LEVIR_CD_Dataset(BaseDataset):
-    def __init__(self, root="./LEVIR_CD", split="train", pair_transforms=None, return_y_image=False):
+    def __init__(self, root=f"{get_module_dir()}/LEVIR_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False):
+        '''
+        assume data is already patchified.
+        splits: train, test
+        '''
 
         x1_dir = f"{root}/{split}/A/"
         x2_dir = f"{root}/{split}/B/"

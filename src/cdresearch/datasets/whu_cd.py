@@ -4,15 +4,11 @@ import zipfile
 import torch
 import cv2 as cv
 from torchvision.utils import save_image
-from torch.utils.data import Dataset
-import matplotlib.pyplot as plt
-from .base_dataset import BaseDataset, Patchify
+from .base_dataset import BaseDataset, Patchify, get_module_dir
 
-def get_module_dir():
-    return os.path.dirname(os.path.abspath(__file__))
 
-def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=True):
-    MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
+    MODULE_DIR = get_module_dir()
     DATA_SOURCE = drive_path
     DATA_DEST = f"{MODULE_DIR}/WHU_CD"
     DATA_PATCH_FOLDER = f"{MODULE_DIR}/WHU_CD_PATCHED/"
@@ -57,13 +53,13 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=True):
             img = patcher(img)
             for i, patch in enumerate(img):
                 save_dest = os.path.join(subsplit_path, image_path.split("/")[-1][:-4] + f"_{i}.png")
-                print(f"Saving image {save_dest}")
+                print(f"Saving image {save_dest}") if verbose else None
                 save_image(patch.float()/255.0, save_dest)
 
     print("Data patchify complete")
 
 class WHU_CD_Dataset(BaseDataset):
-    def __init__(self, root=f"{get_module_dir()}/WHU-CD", split="train", pair_transforms=None, return_y_image=False):
+    def __init__(self, root=f"{get_module_dir()}/WHU_CD_PATCHED", split="train", pair_transforms=None, return_y_image=False):
         '''
         assume data is already patchified.
         splits: train, test

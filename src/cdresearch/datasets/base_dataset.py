@@ -1,6 +1,10 @@
 import torch
 import cv2 as cv
 from torch.utils.data import Dataset
+import os
+
+def get_module_dir():
+    return os.path.dirname(os.path.abspath(__file__))
 
 # Preprocessing: Patchify
 class Patchify:
