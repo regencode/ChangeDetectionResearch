@@ -39,7 +39,7 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256)):
         os.makedirs(split_path + "/" + "A/")
         os.makedirs(split_path + "/" + "B/")
         os.makedirs(split_path + "/" + "label/")
-        image_path_prefix = os.path.join(DATA_DEST, f"Building change detection dataset_add/1. The two-period image data/")
+        image_path_prefix = os.path.join(DATA_DEST, f"{DATA_SOURCE.split('/')[-1][:-4]}/Building change detection dataset_add/1. The two-period image data/")
         image_dict = {
             "A": os.path.join(image_path_prefix, f"2012/whole_image/{split}/image/2012_{split}.tif"),
             "B": os.path.join(image_path_prefix, f"2016/whole_image/{split}/image/2016_{split}.tif"),
