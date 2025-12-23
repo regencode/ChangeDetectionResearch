@@ -4,6 +4,27 @@ import einops as ein
 from .ChangeFormer import DecoderTransformer_v3, MLP
 from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLayer
 
+class ToSequenceForm(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def __call__(self, x: torch.Tensor):
+        if x.ndim < 4:
+            return x
+        return ein.rearrange(x, "n c h w -> n (h w) c")
+
+class ToImageForm(nn.Module):
+    def __init__(self):
+        super().__init__()
+        
+    def __call__(self, x: torch.Tensor):
+        if x.ndim >= 4:
+            return x
+        N, HW, C = x.shape
+        H = HW ** 0.5
+        W = HW ** 0.5
+        return ein.rearrange(x, "n (h w) c -> n c h w", h=H, w=W)
+
 
 class DecoderTransformerCustom(DecoderTransformer_v3):
     def __init__(self, input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=True, 
@@ -24,25 +45,54 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
         self.linear_c4 = nn.Sequential(
                 MLP(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
+                ToImageForm(),
                 nn.Conv2d( # depthwise conv
                     self.embedding_dim,
                     self.embedding_dim,
                     kernel_size=3,
                     padding=1,
                     groups=self.embedding_dim
-                )
+                ),
+                ToSequenceForm()
         )
         self.linear_c3 = nn.Sequential(
                 MLP(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
+                ToImageForm(),
+                nn.Conv2d( # depthwise conv
+                    self.embedding_dim,
+                    self.embedding_dim,
+                    kernel_size=3,
+                    padding=1,
+                    groups=self.embedding_dim
+                ),
+                ToSequenceForm()
         )
         self.linear_c2 = nn.Sequential(
                 MLP(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
+                ToImageForm(),
+                nn.Conv2d( # depthwise conv
+                    self.embedding_dim,
+                    self.embedding_dim,
+                    kernel_size=3,
+                    padding=1,
+                    groups=self.embedding_dim
+                ),
+                ToSequenceForm()
         )
         self.linear_c1 = nn.Sequential(
                 MLP(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
+                ToImageForm(),
+                nn.Conv2d( # depthwise conv
+                    self.embedding_dim,
+                    self.embedding_dim,
+                    kernel_size=3,
+                    padding=1,
+                    groups=self.embedding_dim
+                ),
+                ToSequenceForm()
         )
     def forward(self, inputs1, inputs2):
         # inputs are normalize with linear_c1 to c4
