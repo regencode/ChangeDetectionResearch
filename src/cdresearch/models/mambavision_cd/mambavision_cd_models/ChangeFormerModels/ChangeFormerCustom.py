@@ -22,22 +22,18 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
         self.linear_c4 = nn.Sequential(
                 MLP(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
-                nn.ReLU()
         )
         self.linear_c3 = nn.Sequential(
                 MLP(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
-                nn.ReLU()
         )
         self.linear_c2 = nn.Sequential(
                 MLP(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
-                nn.ReLU()
         )
         self.linear_c1 = nn.Sequential(
                 MLP(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
-                nn.ReLU()
         )
     def forward(self, inputs1, inputs2):
         # inputs are normalize with linear_c1 to c4
