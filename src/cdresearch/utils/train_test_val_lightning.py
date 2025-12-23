@@ -36,7 +36,7 @@ class ChangeDetectionModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = self.process_batch(batch)
-        logits = self(x).float()
+        logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log("batch_train_loss", loss, prog_bar=True, on_epoch=False, on_step=True)
         self.log("train_loss", loss, prog_bar=True, on_epoch=True, on_step=True)
@@ -44,7 +44,7 @@ class ChangeDetectionModel(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = self.process_batch(batch)
-        logits = self(x).float()
+        logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log("batch_val_loss", loss, prog_bar=True, on_epoch=False, on_step=True)
         self.log("val_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
@@ -60,7 +60,7 @@ class ChangeDetectionModel(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = self.process_batch(batch)
-        logits = self(x).float()
+        logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log("test_loss", loss, prog_bar=True, on_epoch=True, on_step=True)
         self.test_metrics.update(logits, y)
