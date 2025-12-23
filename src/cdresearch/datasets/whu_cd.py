@@ -31,9 +31,9 @@ def load_whu(drive_path, patchify=False, patch_size=(256, 256), verbose=False):
         return
 
     patcher = Patchify(*patch_size)
-    #if os.path.exists(DATA_PATCH_FOLDER):
-    #    print("Data patch folder already exists! Skipping patchify...")
-    #    return
+    if os.path.exists(DATA_PATCH_FOLDER):
+        print("Data patch folder already exists! Skipping patchify...")
+        return
     os.makedirs(DATA_PATCH_FOLDER)
     os.makedirs(DATA_PATCH_FOLDER + "train/")
     os.makedirs(DATA_PATCH_FOLDER + "test/")
