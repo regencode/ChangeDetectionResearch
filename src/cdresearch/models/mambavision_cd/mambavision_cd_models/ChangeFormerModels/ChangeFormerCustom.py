@@ -7,6 +7,7 @@ from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLaye
 
 class LearnableScale(nn.Module):
     def __init__(self):
+        super().__init__()
         self.scale = nn.Parameter(torch.ones(1))
 
     def forward(self, x):
