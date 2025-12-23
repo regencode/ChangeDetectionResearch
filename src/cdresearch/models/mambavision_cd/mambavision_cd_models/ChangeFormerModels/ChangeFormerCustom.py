@@ -21,8 +21,8 @@ class ToImageForm(nn.Module):
         if x.ndim >= 4:
             return x
         N, HW, C = x.shape
-        H = HW ** 0.5
-        W = HW ** 0.5
+        H = int(HW ** 0.5)
+        W = int(HW ** 0.5)
         return ein.rearrange(x, "n (h w) c -> n c h w", h=H, w=W)
 
 
