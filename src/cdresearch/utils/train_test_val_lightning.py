@@ -10,13 +10,11 @@ from torch.optim import lr_scheduler
 
 class ChangeDetectionModel(pl.LightningModule):
     def __init__(self, model, loss_fn,
-                 optim="sgd",
-                 optim_kwargs={"lr" : 1e-2},
+                 optim_kwargs={"optim" : "sgd", "lr" : 1e-2},
                  scheduler_kwargs=None):
         super().__init__()
         self.model = model
         self.loss_fn = loss_fn
-        self.optim = optim
         self.optim_kwargs = optim_kwargs
         self.scheduler_kwargs = scheduler_kwargs or {}
         self.val_metrics = BinarySegmentationMetrics()
@@ -77,14 +75,14 @@ class ChangeDetectionModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        if self.optim.lower() == "sgd":
+        if self.optim_kwargs.get("optim").lower() == "sgd":
             optimizer = optim.SGD(self.parameters(), **self.optim_kwargs)
-        elif self.optim.lower() == "adam":
+        elif self.optim_kwargs.get("optim").lower() == "adam":
             optimizer = optim.Adam(self.parameters(), **self.optim_kwargs)
-        elif self.optim.lower() == "adamw":
+        elif self.optim_kwargs.get("optim").lower() == "adamw":
             optimizer = optim.AdamW(self.parameters(), **self.optim_kwargs)
         else:
-            assert AssertionError("optimizer must be either sgd, adam or adaw")
+            assert AssertionError("self.optim_kwargs.optim must be either sgd, adam or adaw")
             return
 
         print(f"using optimizer: {optimizer}")
