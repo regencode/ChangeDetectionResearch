@@ -6,7 +6,7 @@ from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLaye
 
 class ResidualBlockCustom(torch.nn.Module):
     def __init__(self, channels):
-        super(ResidualBlock, self).__init__()
+        super().__init__()
         self.conv1 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
         self.conv2 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
