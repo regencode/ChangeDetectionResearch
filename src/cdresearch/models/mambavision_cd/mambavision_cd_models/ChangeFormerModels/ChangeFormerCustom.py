@@ -4,6 +4,22 @@ import einops as ein
 from .ChangeFormer import DecoderTransformer_v3, MLP
 from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLayer
 
+class ResidualBlockCustom(torch.nn.Module):
+    def __init__(self, channels):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
+        self.relu = nn.ReLU()
+        self.norm = nn.GroupNorm(32, channels)
+
+    def forward(self, x):
+        residual = x
+        out = self.relu(self.conv1(x))
+        out = self.conv2(out) * 0.1
+        out = torch.add(out, residual)
+        out = self.norm(out)
+        return out
+
 class DecoderTransformerCustom(DecoderTransformer_v3):
     def __init__(self, input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=True, 
                     in_channels = [32, 64, 128, 256], embedding_dim= 64, output_nc=2, 
@@ -36,6 +52,9 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
                 MLP(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
                 nn.LayerNorm(self.embedding_dim),
         )
+
+        self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
+        self.dense_1x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
     def forward(self, inputs1, inputs2):
         # inputs are normalize with linear_c1 to c4
         return super().forward(inputs1, inputs2)
