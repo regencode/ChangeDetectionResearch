@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 import einops as ein
-from .ChangeFormer import DecoderTransformer_v3
+from .ChangeFormer import DecoderTransformer_v3, EncoderTransformer_v3
 from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLayer
 
 # Transformer Decoder
@@ -40,21 +40,112 @@ class ToImageForm(nn.Module):
         assert H * W == L, "L must be a perfect square"
         return ein.rearrange(x, "b (h w) d -> b d h w", h=H, w=W)
 
-class ResidualBlockCustom(torch.nn.Module):
-    def __init__(self, channels):
-        super().__init__()
+class ResidualBlockCustom(ResidualBlock):
+    def __init__(self, channels, out_channels):
+        super().__init__(channels)
         self.conv1 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = ConvLayer(channels, out_channels, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
-        self.norm = nn.GroupNorm(32, channels)
 
     def forward(self, x):
         residual = x
         out = self.relu(self.conv1(x))
         out = self.conv2(out) * 0.1
         out = torch.add(out, residual)
-        out = self.norm(out)
         return out
+
+#class EncoderTransformerCustom(EncoderTransformer_v3):
+#    def __init__(self, img_size=256, patch_size=16, in_chans=3, num_classes=2, embed_dims=[64, 128, 256, 512],
+#                 num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
+#                 attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
+#                 depths=[3, 4, 6, 3], sr_ratios=[8, 4, 2, 1]):
+#        super().__init__(
+#                 img_size, patch_size, in_chans, num_classes, embed_dims,
+#                 num_heads, mlp_ratios, qkv_bias, qk_scale, drop_rate,
+#                 attn_drop_rate, drop_path_rate, norm_layer,
+#                 depths, sr_ratios
+#        )
+#        self.num_classes = num_classes
+#        self.depths = depths
+#
+#
+#        # main  encoder
+#        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
+#        cur = 0
+#        self.block1 = nn.ModuleList([Block(
+#            dim=embed_dims[0], num_heads=num_heads[0], mlp_ratio=mlp_ratios[0], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[0])
+#            for i in range(depths[0])])
+#        self.norm1 = norm_layer(embed_dims[0])
+#        # intra-patch encoder
+#        self.patch_block1 = nn.ModuleList([Block(
+#            dim=embed_dims[1], num_heads=num_heads[0], mlp_ratio=mlp_ratios[0], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[0])
+#            for i in range(1)])
+#        self.pnorm1 = norm_layer(embed_dims[1])
+#        # main  encoder
+#        cur += depths[0]
+#        self.block2 = nn.ModuleList([Block(
+#            dim=embed_dims[1], num_heads=num_heads[1], mlp_ratio=mlp_ratios[1], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[1])
+#            for i in range(depths[1])])
+#        self.norm2 = norm_layer(embed_dims[1])
+#        # intra-patch encoder
+#        self.patch_block2 = nn.ModuleList([Block(
+#            dim=embed_dims[2], num_heads=num_heads[1], mlp_ratio=mlp_ratios[1], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[1])
+#            for i in range(1)])
+#        self.pnorm2 = norm_layer(embed_dims[2])
+#        # main  encoder
+#        cur += depths[1]
+#        self.block3 = nn.ModuleList([Block(
+#            dim=embed_dims[2], num_heads=num_heads[2], mlp_ratio=mlp_ratios[2], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[2])
+#            for i in range(depths[2])])
+#        self.norm3 = norm_layer(embed_dims[2])
+#        # intra-patch encoder
+#        self.patch_block3 = nn.ModuleList([Block(
+#            dim=embed_dims[3], num_heads=num_heads[1], mlp_ratio=mlp_ratios[2], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[2])
+#            for i in range(1)])
+#        self.pnorm3 = norm_layer(embed_dims[3])
+#        # main  encoder
+#        cur += depths[2]
+#        self.block4 = nn.ModuleList([Block(
+#            dim=embed_dims[3], num_heads=num_heads[3], mlp_ratio=mlp_ratios[3], qkv_bias=qkv_bias, qk_scale=qk_scale,
+#            drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[cur + i], norm_layer=norm_layer,
+#            sr_ratio=sr_ratios[3]) for i in range(depths[3])])
+#        self.norm4 = norm_layer(embed_dims[3])
+#
+#        self.apply(self._init_weights)
+
+
+class MultiLevelFuse(nn.Module):
+    def __init__(self, embedding_dim=256):
+        super().__init__()
+        self.layer3 = nn.Sequential(
+            ResidualBlockCustom(embedding_dim*2, embedding_dim),
+        )
+        self.layer2 = nn.Sequential(
+            ResidualBlockCustom(embedding_dim*2, embedding_dim),
+        )
+        self.layer1 = nn.Sequential(
+            ResidualBlockCustom(embedding_dim*2, embedding_dim),
+        )
+    def forward(self, x):
+        # x is c4, c3, c2, c1 concatenated at dim=1
+        N, C, H, W = x.shape 
+        x4, x3, x2, x1 = x.reshape(4, N, -1, H, W)
+        _c3 = torch.cat([x4, x3], dim=1)
+        _c2 = torch.cat([_c3, x2], dim=1)
+        _c1 = torch.cat([_c2, x1], dim=1)
+        return _c1
 
 class DecoderTransformerCustom(DecoderTransformer_v3):
     def __init__(self, input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=True, 
@@ -88,6 +179,8 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
                 ToSequenceForm(),
                 MLPCustom(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
         )
+        # original is very lossy, original fuses 4*embed_dims -> embed_dims
+        self.linear_fuse = MultiLevelFuse(self.embedding_dim)
 
         #self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
         #self.dense_1x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
