@@ -248,7 +248,7 @@ class Downsample(nn.Module):
         else:
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
-            nn.Conv2d(dim, dim_out, kernel_size=4, stride=2, bias=False),
+            nn.Conv2d(dim, dim_out, kernel_size=3, stride=2, padding=1, bias=False),
         )
 
     def forward(self, x):
@@ -272,12 +272,12 @@ class PatchEmbed(nn.Module):
         self.proj = nn.Identity()
         if downsample:
             self.conv_down = nn.Sequential(
-                nn.Conv2d(in_chans, in_dim, kernel_size=4, stride=2, bias=False), # kernel stride padding
+                nn.Conv2d(in_chans, in_dim, 7, 4, 3, bias=False), # kernel stride padding
                 nn.BatchNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
-                nn.Conv2d(in_dim, out_chans, kernel_size=4, stride=2, bias=False),
-                nn.BatchNorm2d(out_chans, eps=1e-4),
-                nn.ReLU()
+                #nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
+                #nn.BatchNorm2d(out_chans, eps=1e-4),
+                #nn.ReLU()
                 )
         else:
             print("not downsampling feature map in PatchEmbed")
