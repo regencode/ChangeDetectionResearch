@@ -54,43 +54,43 @@ class ResidualBlockCustom(ResidualBlock):
         out = torch.add(out, residual)
         return out
 
-class EncoderTransformerCustom(EncoderTransformer_v3):
-    def __init__(self, img_size=256, patch_size=16, in_chans=3, num_classes=2, embed_dims=[64, 128, 256, 512],
-                 num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
-                 attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
-                 depths=[3, 4, 6, 3], sr_ratios=[8, 4, 2, 1]):
-        super().__init__(
-                 img_size, patch_size, in_chans, num_classes, embed_dims,
-                 num_heads, mlp_ratios, qkv_bias, qk_scale, drop_rate,
-                 attn_drop_rate, drop_path_rate, norm_layer,
-                 depths, sr_ratios
-        )
-        self.num_classes = num_classes
-        self.depths = depths
-
-
-        # main  encoder
-        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
-        cur = 0
-
-        i = 0
-        self.block1= MambaVisionLayer(dim=int(dim * 2 ** i),
-                                     depth=depths[i],
-                                     num_heads=num_heads[i],
-                                     window_size=window_size[i],
-                                     mlp_ratio=mlp_ratio,
-                                     qkv_bias=qkv_bias,
-                                     qk_scale=qk_scale,
-                                     conv=conv,
-                                     drop=drop_rate,
-                                     attn_drop=attn_drop_rate,
-                                     drop_path=dpr[sum(depths[:i]):sum(depths[:i + 1])],
-                                     downsample=(i < 3),
-                                     layer_scale=layer_scale,
-                                     layer_scale_conv=layer_scale_conv,
-                                     transformer_blocks=list(range(depths[i]//2+1, depths[i])) if depths[i]%2!=0 else list(range(depths[i]//2, depths[i])),
-                                     )
-            self.levels.append(level)
+#class EncoderTransformerCustom(EncoderTransformer_v3):
+#    def __init__(self, img_size=256, patch_size=16, in_chans=3, num_classes=2, embed_dims=[64, 128, 256, 512],
+#                 num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4], qkv_bias=False, qk_scale=None, drop_rate=0.,
+#                 attn_drop_rate=0., drop_path_rate=0., norm_layer=nn.LayerNorm,
+#                 depths=[3, 4, 6, 3], sr_ratios=[8, 4, 2, 1]):
+#        super().__init__(
+#                 img_size, patch_size, in_chans, num_classes, embed_dims,
+#                 num_heads, mlp_ratios, qkv_bias, qk_scale, drop_rate,
+#                 attn_drop_rate, drop_path_rate, norm_layer,
+#                 depths, sr_ratios
+#        )
+#        self.num_classes = num_classes
+#        self.depths = depths
+#
+#
+#        # main  encoder
+#        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
+#        cur = 0
+#
+#        i = 0
+#        self.block1= MambaVisionLayer(dim=int(dim * 2 ** i),
+#                                     depth=depths[i],
+#                                     num_heads=num_heads[i],
+#                                     window_size=window_size[i],
+#                                     mlp_ratio=mlp_ratio,
+#                                     qkv_bias=qkv_bias,
+#                                     qk_scale=qk_scale,
+#                                     conv=conv,
+#                                     drop=drop_rate,
+#                                     attn_drop=attn_drop_rate,
+#                                     drop_path=dpr[sum(depths[:i]):sum(depths[:i + 1])],
+#                                     downsample=(i < 3),
+#                                     layer_scale=layer_scale,
+#                                     layer_scale_conv=layer_scale_conv,
+#                                     transformer_blocks=list(range(depths[i]//2+1, depths[i])) if depths[i]%2!=0 else list(range(depths[i]//2, depths[i])),
+#                                     )
+#            self.levels.append(level)
 #        self.norm1 = norm_layer(embed_dims[0])
 #        # intra-patch encoder
 #        self.patch_block1 = nn.ModuleList([Block(
