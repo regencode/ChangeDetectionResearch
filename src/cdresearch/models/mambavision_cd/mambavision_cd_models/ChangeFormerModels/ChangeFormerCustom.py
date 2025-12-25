@@ -74,22 +74,18 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
 
         self.linear_c4 = nn.Sequential(
                 ToSequenceForm(),
-                nn.LayerNorm(c4_in_channels),
                 MLPCustom(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
         )
         self.linear_c3 = nn.Sequential(
                 ToSequenceForm(),
-                nn.LayerNorm(c3_in_channels),
                 MLPCustom(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
         )
         self.linear_c2 = nn.Sequential(
                 ToSequenceForm(),
-                nn.LayerNorm(c2_in_channels),
                 MLPCustom(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
         )
         self.linear_c1 = nn.Sequential(
                 ToSequenceForm(),
-                nn.LayerNorm(c1_in_channels),
                 MLPCustom(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
         )
 

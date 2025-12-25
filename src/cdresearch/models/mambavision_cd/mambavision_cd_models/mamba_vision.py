@@ -299,7 +299,7 @@ class PatchEmbed(nn.Module):
                 nn.BatchNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
                 nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
-                #nn.BatchNorm2d(out_chans, eps=1e-4)
+                nn.BatchNorm2d(out_chans, eps=1e-4)
                 )
         else:
             print("not downsampling feature map in PatchEmbed")
@@ -309,16 +309,12 @@ class PatchEmbed(nn.Module):
                 nn.ReLU(),
                 nn.Conv2d(in_dim, out_chans, 3, 1, 1, bias=False, padding_mode="reflect"),
                 nn.BatchNorm2d(out_chans, eps=1e-4),
-                nn.ReLU()
                 )
-        self.norm = nn.LayerNorm(out_chans)
 
     def forward(self, x):
         x = self.proj(x)
         x = self.conv_down(x)
         _, _, H, W = x.shape
-        x = ToSequenceForm()(x)
-        x = ToImageForm()(self.norm(x))
         return x
 
 
@@ -717,6 +713,7 @@ class MambaVision(nn.Module):
         self.patch_embed = PatchEmbed(in_chans=in_chans, out_chans=dims[0], in_dim=patch_embed_dim, downsample=patchembed_downsample)
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
         self.levels = nn.ModuleList()
+        self.norms = nn.ModuleList()
         self.downsamples = nn.ModuleList()
         for i in range(len(depths)):
             conv = True if (i == 0 or i == 1) else False
@@ -739,6 +736,12 @@ class MambaVision(nn.Module):
             self.levels.append(level)
             downsample = Downsample(dim=dims[i])
             self.downsamples.append(downsample)
+            norm = nn.Sequential(
+                ToSequenceForm(),
+                nn.LayerNorm(dims[i]),
+                ToImageForm(),
+            )
+            self.norms.append(norm)
         self.apply(self._init_weights)
         num_features = int(dims[-1])
 
@@ -765,7 +768,7 @@ class MambaVision(nn.Module):
         x = self.patch_embed(x)
         x_levels = []
         for i, level in enumerate(self.levels):
-            x = level(x)
+            x = self.norms[i](level(x))
             x_levels.append(x)
             if (i < 3): x = self.downsamples[i](x)
         return x_levels
