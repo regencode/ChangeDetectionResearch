@@ -739,7 +739,6 @@ class MambaVision(nn.Module):
     def forward_features(self, x):
         x = self.patch_embed(x)
         x_levels = []
-        print(x.shape)
         for i, level in enumerate(self.levels):
             x = level(x)
             x_levels.append(x)
