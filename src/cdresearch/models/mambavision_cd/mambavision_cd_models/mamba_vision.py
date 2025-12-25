@@ -248,7 +248,7 @@ class Downsample(nn.Module):
         else:
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
-            nn.Conv2d(dim, dim_out, 3, 2, 1, bias=False, padding_mode="reflect"),
+            nn.Conv2d(dim, dim_out, 4, 2, 2, bias=False),
         )
 
     def forward(self, x):
