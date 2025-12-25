@@ -690,8 +690,8 @@ class MambaVision(nn.Module):
                  drop_path_rate=0.2,
                  qkv_bias=True,
                  qk_scale=None,
-                 drop_rate=0.,
-                 attn_drop_rate=0.,
+                 drop_rate=0.1,
+                 attn_drop_rate=0.1,
                  layer_scale=None,
                  layer_scale_conv=None,
                  patch_embed_dim=256,
@@ -717,6 +717,10 @@ class MambaVision(nn.Module):
             layer_scale_conv: conv layer scaling coefficient.
         """
         super().__init__()
+        print("drop_rate", drop_rate)
+        print("attn_drop_rate", attn_drop_rate)
+        print("drop_path_rate", drop_path_rate)
+
         assert len(dims) == len(depths), f"dims[] len does not match depths[] len"
         print(f"PatchEmbed Downsample: {patchembed_downsample}")
         self.patch_embed = PatchEmbed(in_chans=in_chans, out_chans=dims[0], in_dim=patch_embed_dim, downsample=patchembed_downsample)
