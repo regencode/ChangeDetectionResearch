@@ -272,8 +272,8 @@ class PatchEmbed(nn.Module):
         self.proj = nn.Identity()
         if downsample:
             self.conv_down = nn.Sequential(
-                nn.Conv2d(in_chans, in_dim, 7, 4, 3, bias=False), # kernel stride padding
-                nn.BatchNorm2d(in_dim, eps=1e-4),
+                nn.Conv2d(in_chans, out_chans, 7, 4, 3, bias=False), # kernel stride padding
+                nn.BatchNorm2d(out_chans, eps=1e-4),
                 nn.ReLU(),
                 #nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
                 #nn.BatchNorm2d(out_chans, eps=1e-4),
