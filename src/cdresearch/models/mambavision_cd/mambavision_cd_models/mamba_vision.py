@@ -29,6 +29,29 @@ from einops import rearrange, repeat
 from .registry import register_pip_model
 from pathlib import Path
 
+class ToSequenceForm(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        if x.ndim == 3: return x # already sequence
+        return rearrange(x, "b c h w -> b (h w) c")
+
+class ToImageForm(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        '''
+        assume image has equal width and height, and sequence length is a perfect square
+        '''
+        if x.ndim == 4: return x # already image
+
+        B, L, D = x.shape
+        H = W = int(L ** 0.5)
+        assert H * W == L, "L must be a perfect square"
+        return rearrange(x, "b (h w) d -> b d h w", h=H, w=W)
+
 
 def _cfg(url='', **kwargs):
     return {'url': url,
@@ -272,11 +295,11 @@ class PatchEmbed(nn.Module):
         self.proj = nn.Identity()
         if downsample:
             self.conv_down = nn.Sequential(
-                nn.Conv2d(in_chans, out_chans, 7, 4, 3, bias=False), # kernel stride padding
+                nn.Conv2d(in_chans, out_chans, 3, 2, 1, bias=False), # kernel stride padding
                 nn.BatchNorm2d(out_chans, eps=1e-4),
-                #nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
-                #nn.BatchNorm2d(out_chans, eps=1e-4),
-                #nn.ReLU()
+                nn.ReLU(),
+                nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
+                #nn.BatchNorm2d(out_chans, eps=1e-4)
                 )
         else:
             print("not downsampling feature map in PatchEmbed")
@@ -288,10 +311,14 @@ class PatchEmbed(nn.Module):
                 nn.BatchNorm2d(out_chans, eps=1e-4),
                 nn.ReLU()
                 )
+        self.norm = nn.LayerNorm(out_chans)
 
     def forward(self, x):
         x = self.proj(x)
         x = self.conv_down(x)
+        _, _, H, W = x.shape
+        x = ToSequenceForm()(x)
+        x = ToImageForm()(self.norm(x))
         return x
 
 
