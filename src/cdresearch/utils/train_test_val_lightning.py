@@ -28,6 +28,8 @@ class ChangeDetectionModel(pl.LightningModule):
     def on_train_epoch_start(self):
         opt = self.optimizers()
         self.log("lr", opt.param_groups[0]["lr"], on_epoch=True)
+        self._running_loss = 0.0
+        self._num_steps = 0
 
     def process_batch(self, batch):
         x, y = batch
@@ -39,16 +41,25 @@ class ChangeDetectionModel(pl.LightningModule):
         x, y = self.process_batch(batch)
         logits = self(x)
         loss = self.loss_fn(logits, y)
-        self.log("batch_train_loss", loss, prog_bar=True, on_epoch=False, on_step=True)
+        self._running_loss += loss.item()
+        self._num_steps += 1
         self.log("train_loss", loss, prog_bar=True, on_epoch=True, on_step=True)
+        self.log("running_train_loss", self._running_loss / self._num_steps, prog_bar=True, on_epoch=False, on_step=True)
         return loss
+
+    def on_validation_epoch_start(self):
+        self._running_loss = 0.0
+        self._num_steps = 0
+
 
     def validation_step(self, batch, batch_idx):
         x, y = self.process_batch(batch)
         logits = self(x)
         loss = self.loss_fn(logits, y)
-        self.log("batch_val_loss", loss, prog_bar=True, on_epoch=False, on_step=True)
-        self.log("val_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
+        self._running_loss += loss.item()
+        self._num_steps += 1
+        self.log("val_loss", loss, prog_bar=True, on_epoch=True, on_step=True)
+        self.log("running_val_loss", self._running_loss / self._num_steps, prog_bar=True, on_epoch=False, on_step=True)
         self.val_metrics.update(logits, y)
 
     def on_validation_epoch_end(self):
