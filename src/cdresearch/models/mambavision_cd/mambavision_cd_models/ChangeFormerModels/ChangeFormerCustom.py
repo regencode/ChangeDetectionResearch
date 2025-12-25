@@ -136,13 +136,13 @@ class MultiLevelFuse(nn.Module):
             nn.BatchNorm2d(embedding_dim),
         )
         self.layer2 = nn.Sequential(
-            ResidualBlock(embedding_dim),
+            ResidualBlock(embedding_dim*2),
             nn.Conv2d(embedding_dim*2, embedding_dim, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm2d(embedding_dim),
         )
         self.layer1 = nn.Sequential(
-            ResidualBlock(embedding_dim),
+            ResidualBlock(embedding_dim*2),
             nn.Conv2d(embedding_dim*2, embedding_dim, 3, 1, 1),
             nn.ReLU(),
             nn.BatchNorm2d(embedding_dim),
