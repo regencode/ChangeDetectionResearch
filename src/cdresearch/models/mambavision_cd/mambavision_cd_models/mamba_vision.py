@@ -248,7 +248,7 @@ class Downsample(nn.Module):
         else:
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
-            nn.Conv2d(dim, dim_out, 4, 2, 2, bias=False),
+            nn.Conv2d(dim, dim_out, kernel_size=4, stride=2, bias=False),
         )
 
     def forward(self, x):
@@ -272,10 +272,10 @@ class PatchEmbed(nn.Module):
         self.proj = nn.Identity()
         if downsample:
             self.conv_down = nn.Sequential(
-                nn.Conv2d(in_chans, in_dim, 4, 2, 2, bias=False, padding_mode="reflect"), # kernel stride padding
+                nn.Conv2d(in_chans, in_dim, kernel_size=4, stride=2, bias=False), # kernel stride padding
                 nn.BatchNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
-                nn.Conv2d(in_dim, out_chans, 4, 2, 2, bias=False, padding_mode="reflect"),
+                nn.Conv2d(in_dim, out_chans, kernel_size=4, stride=2, bias=False),
                 nn.BatchNorm2d(out_chans, eps=1e-4),
                 nn.ReLU()
                 )
@@ -744,7 +744,6 @@ class MambaVision(nn.Module):
             x = level(x)
             x_levels.append(x)
             if (i < 3): x = self.downsamples[i](x)
-            print(x.shape)
         return x_levels
 
     def forward(self, x):
