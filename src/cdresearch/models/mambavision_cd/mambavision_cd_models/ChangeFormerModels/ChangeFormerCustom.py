@@ -125,7 +125,6 @@ class ResidualBlockCustom(ResidualBlock):
 #
 #        self.apply(self._init_weights)
 
-
 class MultiLevelFuse(nn.Module):
     def __init__(self, embedding_dim=256):
         super().__init__()
@@ -183,7 +182,8 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
                 MLPCustom(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
         )
         # original is very lossy, original fuses 4*embed_dims -> embed_dims
-        self.linear_fuse = MultiLevelFuse(self.embedding_dim)
+        self.linear_fuse = nn.Sequential(ResidualBlock(self.embedding_dim*4), 
+                                         nn.Conv2d(self.embedding_dim*4, self.embedding_dim, kernel_size=1))
 
         #self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
         #self.dense_1x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
