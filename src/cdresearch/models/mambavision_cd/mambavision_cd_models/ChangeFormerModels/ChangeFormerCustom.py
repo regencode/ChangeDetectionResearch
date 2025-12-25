@@ -142,9 +142,9 @@ class MultiLevelFuse(nn.Module):
         # x is c4, c3, c2, c1 concatenated at dim=1
         N, C, H, W = x.shape 
         x4, x3, x2, x1 = x.reshape(4, N, -1, H, W)
-        _c3 = torch.cat([x4, x3], dim=1)
-        _c2 = torch.cat([_c3, x2], dim=1)
-        _c1 = torch.cat([_c2, x1], dim=1)
+        _c3 = self.layer3(torch.cat([x4, x3], dim=1))
+        _c2 = self.layer2(torch.cat([_c3, x2], dim=1))
+        _c1 = self.layer1(torch.cat([_c2, x1], dim=1))
         return _c1
 
 class DecoderTransformerCustom(DecoderTransformer_v3):
