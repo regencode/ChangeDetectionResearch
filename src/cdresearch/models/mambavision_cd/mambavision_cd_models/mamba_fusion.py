@@ -499,6 +499,8 @@ class MambaVisionCD_V2(nn.Module):
         B, C, H, W = x1.shape
         x1s = self.enc(x1)
         x2s = self.enc(x2)
+        for x in x1s:
+            print(x.shape)
         if self.decoder_model == "changeformer":
             return self.decoder(x1s, x2s)[-1]
         elif self.decoder_model == "changemamba":
