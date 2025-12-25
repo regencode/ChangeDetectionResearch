@@ -304,10 +304,10 @@ class ConvBlock(nn.Module):
                  kernel_size=3):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
         self.norm1 = nn.BatchNorm2d(dim, eps=1e-5)
         self.act1 = nn.GELU(approximate= 'tanh')
-        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
         self.norm2 = nn.BatchNorm2d(dim, eps=1e-5)
         self.layer_scale = layer_scale
         if layer_scale is not None and type(layer_scale) in [int, float]:
@@ -739,10 +739,12 @@ class MambaVision(nn.Module):
     def forward_features(self, x):
         x = self.patch_embed(x)
         x_levels = []
+        print(x.shape)
         for i, level in enumerate(self.levels):
             x = level(x)
             x_levels.append(x)
             if (i < 3): x = self.downsamples[i](x)
+            print(x.shape)
         return x_levels
 
     def forward(self, x):
