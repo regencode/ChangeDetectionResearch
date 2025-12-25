@@ -1,8 +1,44 @@
 import torch
 from torch import nn
 import einops as ein
-from .ChangeFormer import DecoderTransformer_v3, MLP
+from .ChangeFormer import DecoderTransformer_v3
 from .ChangeFormerBaseNetworks import UpsampleConvLayer, ResidualBlock, ConvLayer
+
+# Transformer Decoder
+class MLPCustom(nn.Module):
+    """
+    Linear Embedding
+    """
+    def __init__(self, input_dim=2048, embed_dim=768):
+        super().__init__()
+        self.proj = nn.Linear(input_dim, embed_dim)
+
+    def forward(self, x):
+        x = self.proj(x)
+        return x
+
+class ToSequenceForm(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        if x.ndim == 3: return x # already sequence
+        return ein.rearrange(x, "b c h w -> b (h w) c")
+
+class ToImageForm(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        '''
+        assume image has equal width and height, and sequence length is a perfect square
+        '''
+        if x.ndim == 4: return x # already image
+
+        B, L, D = x.shape
+        H = W = int(L ** 0.5)
+        assert H * W == L, "L must be a perfect square"
+        return ein.rearrange(x, "b (h w) d -> b d h w", h=H, w=W)
 
 class ResidualBlockCustom(torch.nn.Module):
     def __init__(self, channels):
@@ -37,20 +73,24 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
         c1_in_channels, c2_in_channels, c3_in_channels, c4_in_channels = in_channels
 
         self.linear_c4 = nn.Sequential(
+                ToSequenceForm(),
                 nn.LayerNorm(c4_in_channels),
-                MLP(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
+                MLPCustom(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
         )
         self.linear_c3 = nn.Sequential(
+                ToSequenceForm(),
                 nn.LayerNorm(c3_in_channels),
-                MLP(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
+                MLPCustom(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
         )
         self.linear_c2 = nn.Sequential(
+                ToSequenceForm(),
                 nn.LayerNorm(c2_in_channels),
-                MLP(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
+                MLPCustom(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
         )
         self.linear_c1 = nn.Sequential(
+                ToSequenceForm(),
                 nn.LayerNorm(c1_in_channels),
-                MLP(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
+                MLPCustom(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
         )
 
         #self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
