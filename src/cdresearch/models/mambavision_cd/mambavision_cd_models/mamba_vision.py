@@ -272,6 +272,9 @@ class Downsample(nn.Module):
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
             nn.Conv2d(dim, dim_out, kernel_size=3, stride=2, padding=1, bias=False),
+            ToSequenceForm(),
+            nn.LayerNorm(dim_out),
+            ToImageForm(),
         )
 
     def forward(self, x):
@@ -299,7 +302,7 @@ class PatchEmbed(nn.Module):
                 nn.BatchNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
                 nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
-                nn.BatchNorm2d(out_chans, eps=1e-4)
+                #nn.BatchNorm2d(out_chans, eps=1e-4)
                 )
         else:
             print("not downsampling feature map in PatchEmbed")
@@ -310,10 +313,16 @@ class PatchEmbed(nn.Module):
                 nn.Conv2d(in_dim, out_chans, 3, 1, 1, bias=False, padding_mode="reflect"),
                 nn.BatchNorm2d(out_chans, eps=1e-4),
                 )
+        self.norm = nn.Sequential(
+            ToSequenceForm(),
+            nn.LayerNorm(out_chans),
+            ToImageForm()
+        )
 
     def forward(self, x):
         x = self.proj(x)
         x = self.conv_down(x)
+        x = self.norm(x)
         _, _, H, W = x.shape
         return x
 
