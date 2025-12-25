@@ -304,10 +304,10 @@ class ConvBlock(nn.Module):
                  kernel_size=3):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
+        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
         self.norm1 = nn.BatchNorm2d(dim, eps=1e-5)
         self.act1 = nn.GELU(approximate= 'tanh')
-        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
+        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
         self.norm2 = nn.BatchNorm2d(dim, eps=1e-5)
         self.layer_scale = layer_scale
         if layer_scale is not None and type(layer_scale) in [int, float]:
