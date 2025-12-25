@@ -741,7 +741,6 @@ class MambaVision(nn.Module):
             self.downsamples.append(downsample)
         self.apply(self._init_weights)
         num_features = int(dims[-1])
-        self.norm = nn.BatchNorm2d(num_features)
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):

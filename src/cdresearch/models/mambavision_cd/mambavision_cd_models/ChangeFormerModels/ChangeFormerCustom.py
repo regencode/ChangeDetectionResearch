@@ -37,20 +37,20 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
         c1_in_channels, c2_in_channels, c3_in_channels, c4_in_channels = in_channels
 
         self.linear_c4 = nn.Sequential(
+                nn.LayerNorm(c4_in_channels),
                 MLP(input_dim=c4_in_channels, embed_dim=self.embedding_dim),
-                nn.LayerNorm(self.embedding_dim),
         )
         self.linear_c3 = nn.Sequential(
+                nn.LayerNorm(c3_in_channels),
                 MLP(input_dim=c3_in_channels, embed_dim=self.embedding_dim),
-                nn.LayerNorm(self.embedding_dim),
         )
         self.linear_c2 = nn.Sequential(
+                nn.LayerNorm(c2_in_channels),
                 MLP(input_dim=c2_in_channels, embed_dim=self.embedding_dim),
-                nn.LayerNorm(self.embedding_dim),
         )
         self.linear_c1 = nn.Sequential(
+                nn.LayerNorm(c1_in_channels),
                 MLP(input_dim=c1_in_channels, embed_dim=self.embedding_dim),
-                nn.LayerNorm(self.embedding_dim),
         )
 
         #self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
