@@ -130,22 +130,16 @@ class MultiLevelFuse(nn.Module):
     def __init__(self, embedding_dim=256):
         super().__init__()
         self.layer3 = nn.Sequential(
-            ResidualBlock(embedding_dim*2),
             nn.Conv2d(embedding_dim*2, embedding_dim, 3, 1, 1),
             nn.ReLU(),
-            nn.BatchNorm2d(embedding_dim),
         )
         self.layer2 = nn.Sequential(
-            ResidualBlock(embedding_dim*2),
             nn.Conv2d(embedding_dim*2, embedding_dim, 3, 1, 1),
             nn.ReLU(),
-            nn.BatchNorm2d(embedding_dim),
         )
         self.layer1 = nn.Sequential(
-            ResidualBlock(embedding_dim*2),
             nn.Conv2d(embedding_dim*2, embedding_dim, 3, 1, 1),
             nn.ReLU(),
-            nn.BatchNorm2d(embedding_dim),
         )
     def forward(self, x):
         # x is c4, c3, c2, c1 concatenated at dim=1
