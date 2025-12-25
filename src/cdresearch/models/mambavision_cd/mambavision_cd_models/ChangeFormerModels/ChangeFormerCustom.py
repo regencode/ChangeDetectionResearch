@@ -53,8 +53,8 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
                 nn.LayerNorm(self.embedding_dim),
         )
 
-        self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
-        self.dense_1x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
+        #self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
+        #self.dense_1x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
     def forward(self, inputs1, inputs2):
         # inputs are normalize with linear_c1 to c4
         return super().forward(inputs1, inputs2)
