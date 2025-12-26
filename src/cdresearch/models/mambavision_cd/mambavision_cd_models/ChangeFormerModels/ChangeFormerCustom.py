@@ -189,11 +189,6 @@ class DecoderTransformerCustom(DecoderTransformer_v3):
 
         )
         # original is very lossy, original fuses 4*embed_dims -> embed_dims
-        self.linear_fuse = nn.Sequential(ResidualBlock(self.embedding_dim*4), 
-                                         nn.Conv2d(self.embedding_dim*4, self.embedding_dim, kernel_size=1),
-                                         nn.BatchNorm2d(self.embedding_dim)
-        )
-
 
         #self.dense_2x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
         #self.dense_1x   = nn.Sequential( ResidualBlockCustom(self.embedding_dim))
