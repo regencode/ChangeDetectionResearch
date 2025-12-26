@@ -434,7 +434,7 @@ class MambaVisionCD_V2(nn.Module):
             print(f"using dims={self.enc.dims}")
             if patchembed_downsample:
                 self.decoder = DecoderTransformerCustom(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
-                        in_channels=self.enc.dims, embedding_dim=self.enc.dims[0]*2, output_nc=num_classes, 
+                        in_channels=self.enc.dims, embedding_dim=self.enc.dims[1]*2, output_nc=num_classes, 
                         decoder_softmax=False, feature_strides=[2, 4, 8, 16], final_upsample=[True, True])
             else:
                 self.decoder = DecoderTransformerCustom(input_transform='multiple_select', in_index=[0, 1, 2, 3], align_corners=False, 
