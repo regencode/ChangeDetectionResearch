@@ -272,9 +272,7 @@ class Downsample(nn.Module):
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
             nn.Conv2d(dim, dim_out, kernel_size=3, stride=2, padding=1, bias=False),
-            ToSequenceForm(),
-            nn.LayerNorm(dim_out),
-            ToImageForm(),
+            LayerNorm2d(dim_out),
         )
 
     def forward(self, x):
@@ -299,30 +297,24 @@ class PatchEmbed(nn.Module):
         if downsample:
             self.conv_down = nn.Sequential(
                 nn.Conv2d(in_chans, in_dim, 3, 2, 1, bias=False), # kernel stride padding
-                nn.BatchNorm2d(in_dim, eps=1e-4),
+                LayerNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
                 nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
-                #nn.BatchNorm2d(out_chans, eps=1e-4)
+                LayerNorm2d(out_chans, eps=1e-4)
                 )
         else:
             print("not downsampling feature map in PatchEmbed")
             self.conv_down = nn.Sequential(
                 nn.Conv2d(in_chans, in_dim, 3, 1, 1, bias=False, padding_mode="reflect"),
-                nn.BatchNorm2d(in_dim, eps=1e-4),
+                LayerNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
                 nn.Conv2d(in_dim, out_chans, 3, 1, 1, bias=False, padding_mode="reflect"),
-                nn.BatchNorm2d(out_chans, eps=1e-4),
+                LayerNorm2d(out_chans, eps=1e-4),
                 )
-        self.norm = nn.Sequential(
-            ToSequenceForm(),
-            nn.LayerNorm(out_chans),
-            ToImageForm()
-        )
 
     def forward(self, x):
         x = self.proj(x)
         x = self.conv_down(x)
-        x = self.norm(x)
         _, _, H, W = x.shape
         return x
 
@@ -336,10 +328,10 @@ class ConvBlock(nn.Module):
         super().__init__()
 
         self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
-        self.norm1 = nn.BatchNorm2d(dim, eps=1e-5)
+        self.norm1 = LayerNorm2d(dim)
         self.act1 = nn.GELU(approximate= 'tanh')
         self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
-        self.norm2 = nn.BatchNorm2d(dim, eps=1e-5)
+        self.norm2 = LayerNorm2d(dim)
         self.layer_scale = layer_scale
         if layer_scale is not None and type(layer_scale) in [int, float]:
             self.gamma = nn.Parameter(layer_scale * torch.ones(dim))
@@ -749,11 +741,7 @@ class MambaVision(nn.Module):
             self.levels.append(level)
             downsample = Downsample(dim=dims[i])
             self.downsamples.append(downsample)
-            norm = nn.Sequential(
-                ToSequenceForm(),
-                nn.LayerNorm(dims[i]),
-                ToImageForm(),
-            )
+            norm = LayerNorm2d(dims[i])
             self.norms.append(norm)
         self.apply(self._init_weights)
         num_features = int(dims[-1])
