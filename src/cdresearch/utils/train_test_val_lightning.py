@@ -80,7 +80,7 @@ class ChangeDetectionModel(pl.LightningModule):
     def on_test_epoch_end(self):
         metrics = self.test_metrics.compute()
         self.log_dict(
-            {f"val_{k}": v for k, v in metrics.items()},
+            {f"test_{k}": v for k, v in metrics.items()},
             prog_bar=True
         )
         self.test_metrics.reset()
