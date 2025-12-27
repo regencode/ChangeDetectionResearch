@@ -29,29 +29,6 @@ from einops import rearrange, repeat
 from .registry import register_pip_model
 from pathlib import Path
 
-class ToSequenceForm(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        if x.ndim == 3: return x # already sequence
-        return rearrange(x, "b c h w -> b (h w) c")
-
-class ToImageForm(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        '''
-        assume image has equal width and height, and sequence length is a perfect square
-        '''
-        if x.ndim == 4: return x # already image
-
-        B, L, D = x.shape
-        H = W = int(L ** 0.5)
-        assert H * W == L, "L must be a perfect square"
-        return rearrange(x, "b (h w) d -> b d h w", h=H, w=W)
-
 
 def _cfg(url='', **kwargs):
     return {'url': url,
@@ -271,8 +248,7 @@ class Downsample(nn.Module):
         else:
             dim_out = 2 * dim
         self.reduction = nn.Sequential(
-            nn.Conv2d(dim, dim_out, kernel_size=3, stride=2, padding=1, bias=False),
-            LayerNorm2d(dim_out),
+            nn.Conv2d(dim, dim_out, kernel_size=3, stride=2, padding=1, bias=False)
         )
 
     def forward(self, x):
@@ -300,7 +276,8 @@ class PatchEmbed(nn.Module):
                 LayerNorm2d(in_dim, eps=1e-4),
                 nn.ReLU(),
                 nn.Conv2d(in_dim, out_chans, 3, 2, 1, bias=False),
-                LayerNorm2d(out_chans, eps=1e-4)
+                LayerNorm2d(out_chans, eps=1e-4),
+                nn.ReLU(),
                 )
         else:
             print("not downsampling feature map in PatchEmbed")
@@ -327,11 +304,11 @@ class ConvBlock(nn.Module):
                  kernel_size=3):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
-        self.norm1 = LayerNorm2d(dim)
-        self.act1 = nn.GELU(approximate= 'tanh')
-        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding="same")
-        self.norm2 = LayerNorm2d(dim)
+        self.conv1 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
+        self.norm1 = nn.BatchNorm2d(dim, eps=1e-5)
+        self.act1 =  nn.GELU(approximate= 'tanh')
+        self.conv2 = nn.Conv2d(dim, dim, kernel_size=kernel_size, stride=1, padding=1)
+        self.norm2 = nn.BatchNorm2d(dim, eps=1e-5)
         self.layer_scale = layer_scale
         if layer_scale is not None and type(layer_scale) in [int, float]:
             self.gamma = nn.Parameter(layer_scale * torch.ones(dim))
