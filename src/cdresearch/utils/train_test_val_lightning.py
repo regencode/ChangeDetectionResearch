@@ -79,7 +79,7 @@ class ChangeDetectionModel(pl.LightningModule):
         self.test_metrics.update(logits, y)
         if batch_idx % 10 == 0:
             x = ein.rearrange(x, "p n c h w -> n p c h w")
-            x = ((x + 1.0)*0.5 * 255.0)
+            x = ((x + 1.0)*0.5)
             display_during_inference(x, y, logits)
 
     def on_test_epoch_end(self):
