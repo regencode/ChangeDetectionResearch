@@ -61,6 +61,7 @@ def display_during_inference(X_batch : torch.Tensor, y_binary : torch.Tensor, ou
     pred_binary = torch.argmax(outputs_binary, dim=1)[0]
     y = y_binary[0]
     new_pred_display = torch.zeros((W, H, C), dtype=torch.long)
+    new_label_display = torch.zeros((W, H, C), dtype=torch.long)
 
     # red: overpredict
     # blue: underpredict
@@ -72,6 +73,8 @@ def display_during_inference(X_batch : torch.Tensor, y_binary : torch.Tensor, ou
     new_pred_display[tp] = torch.tensor((255, 255, 255))
     new_pred_display[fp] = torch.tensor((255, 0, 0))
     new_pred_display[fn] = torch.tensor((0, 0, 255))
+
+    new_label_display[y == 1] = torch.tensor((255, 255, 255))
     
     args = {
         "rows": 2,
@@ -81,7 +84,7 @@ def display_during_inference(X_batch : torch.Tensor, y_binary : torch.Tensor, ou
     display_images({
         "X_before" : x1.cpu(),
         "X_after" : x2.cpu(),
-        "y_binary_changes": y.cpu(),
+        "y_binary_changes": new_label_display.cpu(),
         "pred_binary_changes": new_pred_display.cpu()
         }, **args
     )
