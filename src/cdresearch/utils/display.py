@@ -69,7 +69,7 @@ def display_during_inference(X_batch : torch.Tensor, y_binary : torch.Tensor, ou
     fp = (pred_binary == 1) & (y == 0)
     fn = (pred_binary == 0) & (y == 1)
 
-    new_pred_display[tp | tn] = torch.tensor((255, 255, 255))
+    new_pred_display[tp] = torch.tensor((255, 255, 255))
     new_pred_display[fp] = torch.tensor((255, 0, 0))
     new_pred_display[fn] = torch.tensor((0, 0, 255))
     
