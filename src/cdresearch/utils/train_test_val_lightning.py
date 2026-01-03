@@ -6,6 +6,7 @@ from .metrics_lightning import BinarySegmentationMetrics
 import pytorch_lightning as pl
 from torch import optim
 from torch.optim import lr_scheduler
+import einops as ein
 
 
 class ChangeDetectionModel(pl.LightningModule):
@@ -77,6 +78,7 @@ class ChangeDetectionModel(pl.LightningModule):
         self.log("test_loss", loss, prog_bar=True, on_epoch=True, on_step=True)
         self.test_metrics.update(logits, y)
         if batch_idx % 10 == 0:
+            x = ein.rearrange(x, "p n c h w -> n p c h w")
             display_during_inference(x, y, logits)
 
     def on_test_epoch_end(self):
