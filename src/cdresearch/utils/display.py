@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import einops as ein
 
 
 def display_images(image_dict: dict[str, str | np.ndarray | torch.Tensor], 
@@ -40,7 +41,7 @@ def display_images(image_dict: dict[str, str | np.ndarray | torch.Tensor],
         plt.title(title)
     plt.show()
 
-def display_during_inference(X_batch, y_binary, outputs_binary):
+def display_during_inference(X_batch : torch.Tensor, y_binary : torch.Tensor, outputs_binary : torch.Tensor):
     '''
     Display first tensor in batch only.
     '''
@@ -54,12 +55,24 @@ def display_during_inference(X_batch, y_binary, outputs_binary):
     # cannot use tensor.view because X is likely to have been permuted earlier,
     # causing non-contiguous memory positions.
 
-    X_batch = X_batch.permute(0, 1, 3, 4, 2) # (N, 2, W, H, C)
-    x1, x2 = X_batch[0] # (W, H, C)
-    # (W, H, C)
+    X_batch = X_batch.permute(0, 1, 3, 4, 2) # (N, 2, H, W, C)
+    x1, x2 = X_batch[0] # (H, W, C)
+    # (H, W, C)
     pred_binary = torch.argmax(outputs_binary, dim=1)[0]
     y = y_binary[0]
+    new_pred_display = torch.zeros((W, H, C))
 
+    # red: overpredict
+    # blue: underpredict
+    tp = (pred_binary == 1) & (y == 1)
+    tn = (pred_binary == 0) & (y == 0)
+    fp = (pred_binary == 1) & (y == 0)
+    fn = (pred_binary == 0) & (y == 1)
+
+    new_pred_display[tp | tn] = torch.tensor((255, 255, 255))
+    new_pred_display[fp] = torch.tensor((255, 0, 0))
+    new_pred_display[fn] = torch.tensor((0, 0, 255))
+    
     args = {
         "rows": 2,
         "cols": 2,
@@ -69,7 +82,7 @@ def display_during_inference(X_batch, y_binary, outputs_binary):
         "X_before" : x1.cpu(),
         "X_after" : x2.cpu(),
         "y_binary_changes": y.cpu(),
-        "pred_binary_changes": pred_binary.cpu()
+        "pred_binary_changes": new_pred_display.cpu()
         }, **args
     )
 
