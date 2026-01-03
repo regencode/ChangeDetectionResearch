@@ -55,11 +55,10 @@ def display_during_inference(X_batch, y_binary, outputs_binary):
     # causing non-contiguous memory positions.
 
     X_batch = X_batch.permute(0, 1, 3, 4, 2) # (N, 2, W, H, C)
-    rand_idx = np.random.randint(0, N)
-    x1, x2 = X_batch[rand_idx] # (W, H, C)
+    x1, x2 = X_batch[0] # (W, H, C)
     # (W, H, C)
-    pred_binary = torch.argmax(outputs_binary, dim=1)[rand_idx]
-    y = y_binary[rand_idx]
+    pred_binary = torch.argmax(outputs_binary, dim=1)[0]
+    y = y_binary[0]
 
     args = {
         "rows": 2,
