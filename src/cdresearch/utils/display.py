@@ -60,7 +60,7 @@ def display_during_inference(X_batch : torch.Tensor, y_binary : torch.Tensor, ou
     # (H, W, C)
     pred_binary = torch.argmax(outputs_binary, dim=1)[0]
     y = y_binary[0]
-    new_pred_display = torch.zeros((W, H, C))
+    new_pred_display = torch.zeros((W, H, C), dtype=torch.long)
 
     # red: overpredict
     # blue: underpredict
