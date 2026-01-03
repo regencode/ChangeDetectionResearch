@@ -77,7 +77,7 @@ class ChangeDetectionModel(pl.LightningModule):
         loss = self.loss_fn(logits, y)
         self.log("test_loss", loss, prog_bar=True, on_epoch=True, on_step=True)
         self.test_metrics.update(logits, y)
-        if batch_idx % 10 == 0:
+        if batch_idx % 5 == 0:
             x = ein.rearrange(x, "p n c h w -> n p c h w")
             x = ((x + 1.0)*0.5)
             display_during_inference(x, y, logits)
